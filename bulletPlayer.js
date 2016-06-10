@@ -192,6 +192,7 @@
             playBtn = document.querySelector("#BPlayer-playBtn"),
             timerPlayed = document.querySelector("#BPlayer-timer-played"),
             playBar = document.querySelector("#BPlayer-playBar"),
+            playBarLoaded = document.querySelector("#BPlayer-playBar-loaded"),
             playBarPlayed = document.querySelector("#BPlayer-playBar-played"),
             playThumb = document.querySelector("#BPlayer-play-thumb"),
             controler = document.querySelector("#BPlayer-controler"),
@@ -200,7 +201,7 @@
             timeout;
 
         /**
-         * 获取视频时常，添加到时间栏
+         * 获取视频时长，添加到时间栏
          */
         video.addEventListener("canplaythrough",function () {
             var timelength = document.querySelector("#BPlayer-timer-length");
@@ -208,8 +209,9 @@
         });
 
         video.addEventListener("progress",function () {
-            var buffered = video.buffered;
-            console.log(buffered);
+            var buffered = video.buffered.end(0);
+            console.log(buffered / video.duration * 100);
+            playBarLoaded.style.width = (buffered / video.duration * 100) + "%";
         });
 
         /**
