@@ -110,22 +110,23 @@
             }
     }
     /************* 以下是本库提供的公有方法 *************/
-    BulletPlayer.prototype.setVideo = function(videoUrl,opt) {
+    BulletPlayer.prototype.setVideo = function(videoUrl,posterUrl,opt) {
         this.container.style.height = "";
 
         var _opt = opt || {};
         _options.fullscreenState = false;
         _options.bulletState = _opt.bulletState || true;
         _options.volume = _opt.volume || 0.5;
-        _options.video = "";
+        _options.video = videoUrl;
+        _options.poster = posterUrl;
 
-        this.addVideo(videoUrl);
+        this.addVideo(videoUrl,posterUrl);
         this.addControler();
         this.initPlayState();
         this.initVolumeState();
     };
     
-    BulletPlayer.prototype.addVideo = function(videoUrl) {
+    BulletPlayer.prototype.addVideo = function(videoUrl,posterUrl) {
         if (document.querySelector("#BPlayer")) {
             document.querySelector("#BPlayer").remove();
         }
@@ -135,7 +136,8 @@
             player = document.createElement("div");
         player.id = "BPlayer";
         video.id = "BPlayer-video";
-        video.src = videoUrl;
+        video.poster = posterUrl;
+        video.innerHTML = "<source src='" + videoUrl + "'>";
         video.style.height = this.container.offsetHeigh + "px";
         player.appendChild(video);
         this.container.appendChild(player);
