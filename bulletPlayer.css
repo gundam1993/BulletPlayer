@@ -1,0 +1,283 @@
+
+
+@font-face {font-family: "iconfont";
+  src: url('//at.alicdn.com/t/font_1465459484_6822903.eot'); /* IE9*/
+  src: url('//at.alicdn.com/t/font_1465459484_6822903.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+    url('data:application/x-font-woff;charset=utf-8;base64,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') format('woff'), /* chrome,firefox */
+    url('//at.alicdn.com/t/font_1465459484_6822903.ttf') format('truetype'), /* chrome,firefox,opera,Safari, Android, iOS 4.2+*/
+  url('//at.alicdn.com/t/font_1465459484_6822903.svg#iconfont') format('svg'); /* iOS 4.1- */
+  src: url('//at.alicdn.com/t/font_1465459484_6822903.eot')\0; /* ie8 fix */
+
+}
+
+.iconfont {
+  font-family:"iconfont" !important;
+  font-size:30px;
+  font-style:normal;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-stroke-width: 0.2px;
+  -moz-osx-font-smoothing: grayscale;
+}
+.icon-untitled8:before { content: "\e600"; }
+.icon-fullscreenexit:before { content: "\e601"; }
+.icon-fullscreen:before { content: "\e602"; }
+.icon-pause:before { content: "\e603"; }
+.icon-playarrow:before { content: "\e604"; }
+.icon-volumedown:before { content: "\e605"; }
+.icon-volumemute:before { content: "\e606"; }
+.icon-volumeoff:before { content: "\e607"; }
+.icon-volumeup:before { content: "\e608"; }
+.icon-loop:before { content: "\e609"; }
+
+#BPlayer
+{
+    margin: auto;
+    position: relative;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    background-color: #000;
+}
+
+#BPlayer-videoArea
+{
+    background-color: #000;
+    height: 100%;
+    width: 100%;
+}
+
+#BPlayer-video
+{
+    display: block;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+}
+
+#BPlayer-controler
+{
+    width: 100%;
+    height: 45px;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: 3;
+    box-sizing: border-box;
+    padding: 0 20px;
+    transition: transform 0.3s ease-in-out
+}
+
+.BPlayer-controler-hide
+{
+    transform: translateY(100%);
+}
+
+/*按钮控件通用*/
+.BPlayer-Btn
+{
+    height: 40px;
+    width: 40px;
+    float: left;
+    text-align: center;
+    line-height: 100%;
+    vertical-align: middle;
+    color: #BBB;
+    margin: 5px 0 0 10px;
+    cursor: pointer;
+    transition: color 0.2s ease-in-out;
+}
+
+.BPlayer-Btn:hover
+{
+    color: #FFF;
+}
+
+/*播放/暂停按钮*/
+#BPlayer-playBtn i
+{
+    display: block;
+    margin: 8px 0;
+}
+
+/*音量控制*/
+#BPlayer-volumeControler
+{
+    height: 45px;
+    width: 65px;
+    float: left;
+    overflow: hidden;
+    transition: all 0.1s ease-in-out; 
+}
+
+#BPlayer-volumeControler:hover
+{
+    width: 120px;
+    transition: all 0.3s ease-in-out; 
+}
+
+#BPlayer-volumeBtn
+{
+    width: 45px;
+    text-align: left;
+}
+
+#BPlayer-volumeBtn i 
+{
+    display: block;
+    margin: 8px 0;
+}
+
+#BPlayer-volumeBar-container
+{
+    display: inline-block;
+    margin: 0 8px 0 -5px;
+    vertical-align: middle;
+    height: 100%;
+    cursor: pointer;
+    position: relative;
+}
+
+#BPlayer-volumeControler:hover>#BPlayer-volumeBar-container
+{
+    width: 55px;
+
+}
+
+#BPlayer-volumeBar
+{
+    height: 3px;
+    width: 0;
+    background-color: #DDD;
+    position: absolute;
+    top: 20px;
+    left: 0;
+    transition: all 0.3s ease-in-out;
+}
+
+#BPlayer-volumeControler:hover #BPlayer-volumeBar
+{
+    width: 55px;
+    transition: all 0.3s ease-in-out; 
+}
+
+#BPlayer-volumeBar-inner
+{
+    height: 3px;
+    width: 0;
+    max-width: 100%;
+    background-color: #AB3B3A;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.BPlayer-thumb
+{
+    display: block;
+    height: 12px;
+    width: 8px;
+    background-color: #BBB;
+    position: absolute;
+    top: -3.5px;
+    left: 0;
+    transition: all 0.3s ease-in-out;
+    transform: scale(0);
+
+}
+
+#BPlayer-volume-thumb
+{
+    transition: all 0.3s ease-in-out;
+}
+
+#BPlayer-volumeControler:hover .BPlayer-thumb
+{
+    transform: scale(1);
+    transition: transform 0.3s ease-in-out; 
+}
+
+
+/*全屏按钮*/
+#BPlayer-fullscreenBtn
+{
+    float: right;
+    margin: 5px 10px 0 0;
+}
+
+#BPlayer-fullscreenBtn i 
+{
+    display: block;
+    margin: 8px 0;
+}
+
+#BPlayer:-webkit-full-screen 
+{
+  width: 100%;
+  height: 100%;
+}
+
+/*循环播放按钮*/
+#BPlayer-loopBtn
+{
+    float: right;
+}
+#BPlayer-loopBtn i 
+{
+    display: block;
+    margin: 8px 0;
+}
+
+/*时间控制条*/
+#BPlayer-playBar
+{
+    height: 3px;
+    background-color: rgba(50,50,50,0.5);
+    cursor: pointer;
+    position: relative;
+}
+
+#BPlayer-playBar-loaded
+{
+    height: 3px;
+    background-color: rgba(255,255,255,0.3);
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+#BPlayer-playBar-played
+{
+    height: 3px;
+    width: 0;
+    max-width: 100%;
+    background-color: #AB3B3A;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+#BPlayer-play-thumb
+{
+    position: relative;
+    top: -4.5px;
+}
+
+#BPlayer-playBar:hover .BPlayer-thumb
+{
+    transform: scale(1);
+    transition: transform 0.3s ease-in-out; 
+}
+
+/*时间*/
+#BPlayer-timer
+{
+    font-size: 14px;
+    color: #FFF;
+    float: left;
+    margin-top: 14px;
+}
+
+#BPlayer-timer span
+{
+    margin: 0 5px;
+}
