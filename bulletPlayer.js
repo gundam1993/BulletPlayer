@@ -124,6 +124,13 @@
         this.addControler();
         this.initPlayState();
         this.initVolumeState();
+        this.addDanmukuControler();
+        
+        /*
+        setInterval(function () {
+            a.addDanmuku(123654);
+        },200);
+        */
     };
     
     BulletPlayer.prototype.addVideo = function(videoUrl,posterUrl) {
@@ -133,13 +140,19 @@
 
         var video = document.createElement("VIDEO"),
             videoArea = document.createElement("div"),
+            danmukuArea = document.createElement("div"),
             player = document.createElement("div");
+
         player.id = "BPlayer";
         video.id = "BPlayer-video";
-        video.poster = posterUrl;
+        danmukuArea.id = "BPlayer-danmukuArea";
+
+        //video.poster = posterUrl;
         video.innerHTML = "<source src='" + videoUrl + "'>";
         video.style.height = this.container.offsetHeigh + "px";
+
         player.appendChild(video);
+        player.appendChild(danmukuArea);
         this.container.appendChild(player);
     };
 
@@ -151,6 +164,7 @@
             loop = document.createElement("div"),
             volumeControler = _buildVolumeControler(),
             playBar = _buildPlayBar(),
+            danmukuBtn = document.createElement("div"),
             player = document.querySelector("#BPlayer"),
             video = document.querySelector("#BPlayer-video");
 
@@ -159,13 +173,16 @@
         fullscreenBtn.id = "BPlayer-fullscreenBtn";
         timer.id = "BPlayer-timer";
         loop.id = "BPlayer-loopBtn";
+        danmukuBtn.id = "BPlayer-danmukuBtn";
         playBtn.className  = "BPlayer-Btn";
         fullscreenBtn.className  = "BPlayer-Btn";
         loop.className = "BPlayer-Btn";
+        danmukuBtn.className = "BPlayer-Btn";
 
         playBtn.innerHTML = "<i class='iconfont icon-playarrow' id='BPlayer-playMark'></i>";
         fullscreenBtn.innerHTML = "<i class='iconfont icon-fullscreen' id='BPlayer-fullscreenMark'></i>";
         loop.innerHTML = "<i class='iconfont icon-loop' id='BPlayer-loopMark'></i>";
+        danmukuBtn.innerHTML = "<i class='iconfont icon-icon' id='BPlayer-loopMark'></i>";
         timer.innerHTML = "<span id='BPlayer-timer-played'>00:00</span>/<span id='BPlayer-timer-length'>00:00</span>";    
 
         fullscreenBtn.onclick = function () {
@@ -179,12 +196,22 @@
                 fullscreenMark.className = "iconfont icon-fullscreen";
             }
         };
+
+        danmukuBtn.onclick = function () {
+          var danmukuControler = document.querySelector("#BPlayer-danmuku-controler");
+          if (document.querySelector(".BPlayer-danmuku-controler-hide")) {
+            danmukuControler.className = "BPlayer-danmuku-controler-show";
+          } else{
+            danmukuControler.className = "BPlayer-danmuku-controler-hide";
+          }
+        };
         
         controler.appendChild(playBtn);
         controler.appendChild(volumeControler);
         controler.appendChild(timer);
         controler.appendChild(fullscreenBtn);
         controler.appendChild(loop);
+        controler.appendChild(danmukuBtn);
         controler.appendChild(playBar);
         player.appendChild(controler);
     };
@@ -210,10 +237,14 @@
             timelength.innerHTML = _secondToTime(video.duration);
         });
 
+        /**
+         * 缓冲
+         */
         video.addEventListener("progress",function () {
-            var buffered = video.buffered.end(0);
-            console.log(buffered / video.duration * 100);
-            playBarLoaded.style.width = (buffered / video.duration * 100) + "%";
+            if (video.readyState === 4) {
+                var buffered = video.buffered.end(0);
+                playBarLoaded.style.width = (buffered / video.duration * 100) + "%";
+            }
         });
 
         /**
@@ -290,7 +321,7 @@
                 video.loop = false;
                 loopBtn.style.color = "#BBB";
             }else{
-                video.loop = true;
+                video.loop = "loop";
                 loopBtn.style.color = "#AB3B3A";
             }
         });
@@ -345,6 +376,58 @@
                 document.removeEventListener('mousemove', volumeBarMove);
             });
         });
+    };
+
+    BulletPlayer.prototype.addDanmukuControler = function() {
+        var danmukuControler = document.createElement("div"),
+            danmukuStyleBtn = document.createElement("div"),
+            danmukuInput = document.createElement("input"),
+            danmukuShooter = document.createElement("div"),
+            video = document.querySelector("#BPlayer");
+
+        danmukuControler.id = "BPlayer-danmuku-controler";
+        danmukuStyleBtn.id = "BPlayer-danmuku-style";
+        danmukuInput.id = "BPlayer-danmuku-input";
+        danmukuShooter.id = "BPlayer-danmuku-shooter";
+        danmukuControler.className = "BPlayer-danmuku-controler-hide";
+
+        danmukuStyleBtn.innerHTML = "<i class='iconfont icon-settings' id='BPlayer-danmukuStyleMark'></i>";
+        danmukuShooter.innerHTML = "<i class='iconfont icon-send' id='BPlayer-danmukuShooterMark'></i>";
+        danmukuInput.type = "text";
+        danmukuInput.placeholder = "输入弹幕，回车发送"
+
+        danmukuControler.appendChild(danmukuStyleBtn);
+        danmukuControler.appendChild(danmukuInput);
+        danmukuControler.appendChild(danmukuShooter);
+        video.appendChild(danmukuControler);
+
+    };
+
+    BulletPlayer.prototype.addDanmuku = function(danmukuOpt) {
+        var danmukuArea = document.querySelector("#BPlayer-danmukuArea"),
+            danmukuItem = document.createElement("div");
+
+    danmukuItem.className = "BPlayer-danmuku-item";
+    danmukuItem.innerHTML = danmukuOpt;
+    danmukuItem.style.color = "#FFF";
+
+    danmukuArea.appendChild(danmukuItem);
+    danmukuItem.style.top = 0;
+    var width = -danmukuItem.offsetWidth,
+        end  = danmukuArea.offsetWidth + danmukuItem.offsetWidth;
+    danmukuItem.style.right = width + "px";
+
+    function step() {
+        width += (end / 300);
+        danmukuItem.style.right = width + "px";
+        if (width < end) {
+            requestAnimationFrame(step);
+        }else{
+            danmukuItem.remove();
+        }
+    }
+
+    var animations = requestAnimationFrame(step);
     };
     
     /************* 以上是本库提供的公有方法 *************/
