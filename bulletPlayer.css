@@ -331,13 +331,7 @@
     top: 0;
     left: 5px;
     cursor: pointer;
-    transition: color 0.3s ease-in-out;    
-}
-
-#BPlayer-danmuku-style:hover
-{
-    color: #FFF;
-    transition: color 0.3s ease-in-out;    
+    transition: color 0.2s ease-in-out;    
 }
 
 #BPlayer-danmuku-style i 
@@ -389,6 +383,104 @@
     margin: 5px 0;
 }
 
+/*弹幕样式面板*/
+#BPlayer-danmuku-styleMenu
+{
+    width: 380px;
+    background-color: rgba(0,0,0,0.5);
+    border-radius: 5px;
+    position: absolute;
+    left: 50%;
+    bottom: 50px;
+    padding: 15px 10px;
+    transition: transform 0.3s ease-in-out; 
+}
+
+.BPlayer-danmuku-styleMenu-hide
+{
+    transform: translate(-50%,250%);
+}
+
+
+.BPlayer-danmuku-styleMenu-show
+{
+    transform: translate(-50%,0%);
+}
+
+#BPlayer-danmuku-PositionMenu
+{
+    width: 100%;
+    text-align: center;
+    color: #FFF;
+    font-size: 16px;
+}
+
+#BPlayer-danmuku-PositionMenu>span
+{
+    display: block;
+    line-height: 22px;
+    margin-bottom: 4px;
+}
+
+.hidden-input
+{
+    opacity: 0;
+    position: absolute;
+    z-index: -1;
+}
+
+.BPlayer-danmuku-Position+span {
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    border-radius: 4px;  
+    margin: 0 15px 0 15px;
+    line-height: 50px;
+    border: 2px solid #333;
+    color: #333;
+    cursor: pointer; 
+    text-align: center;
+    justify-content: center;     
+}
+
+.BPlayer-danmuku-Position:checked+span {
+    border: 2px solid #FFF;
+    color: #FFF;
+}
+
+#BPlayer-danmuku-ColorMenu
+{
+    width: 100%;
+    padding: 10px 0;
+    align-content: center;
+    color: #FFF;
+    text-align: center;
+    font-size: 16px;
+}
+
+#BPlayer-danmuku-ColorMenu>span
+{
+    display: block;
+    line-height: 22px;
+    margin-bottom: 4px;
+}
+
+.BPlayer-danmuku-Color+span {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    border-radius: 4px;  
+    border: 2px solid #333;
+    cursor: pointer;
+    text-align: center;
+    justify-content: center;     
+}
+
+.BPlayer-danmuku-Color:checked+span {
+    border: 2px solid #FFF;
+}
+
 /*弹幕*/
 #BPlayer-danmukuArea
 {
@@ -403,5 +495,15 @@
 .BPlayer-danmuku-item
 {
     font-size: 30px;
+    display: inline-block;
     position: absolute;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: default;
+    white-space: nowrap;
+    font-weight: bolder;
+    text-shadow: .5px .5px .5px rgba(0,0,0,.5);
+    transition: transform 
 }

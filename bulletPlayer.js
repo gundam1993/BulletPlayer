@@ -55,12 +55,13 @@
         volumeBtn.className  = "BPlayer-Btn";
 
         volumeBtn.innerHTML = "<i class='iconfont icon-volumeup' id='BPlayer-volumeMark'></i>";
-        volumeBar.innerHTML = "<div id='BPlayer-volumeBar-inner'><span id='BPlayer-volume-thumb' class='BPlayer-thumb'></span><div>";
+        volumeBar.innerHTML = "<div id='BPlayer-volumeBar-inner'>\
+                                    <span id='BPlayer-volume-thumb' class='BPlayer-thumb'></span>\
+                                <div>";
         
         volumeBarContainer.appendChild(volumeBar);
         volumeControler.appendChild(volumeBtn);
         volumeControler.appendChild(volumeBarContainer);
-
 
         return volumeControler;
     }
@@ -83,6 +84,45 @@
         playBarContainer.appendChild(playBar);
 
         return playBarContainer;
+    }
+
+    function _buildDanmukuStyleMenu() {
+        var danmukuStyleMenu = document.createElement("div"),
+            danmukuColorMenu = document.createElement("div"),
+            danmukuPositionMenu = document.createElement("div"),
+            danmukuOpacityMenu = document.createElement("div"),
+            colors = ["#FFF","#000","#CB1B45","#A5DEE4","#F05E1C","#86C166","#FFC408","#8F77B5"];
+
+
+        danmukuStyleMenu.id = "BPlayer-danmuku-styleMenu";
+        danmukuColorMenu.id = "BPlayer-danmuku-ColorMenu";
+        danmukuPositionMenu.id = "BPlayer-danmuku-PositionMenu";
+        danmukuOpacityMenu.id = "BPlayer-danmuku-OpacityMenu";
+
+        danmukuPositionMenu.innerHTML = "<span>弹幕模式</span>\
+                                        <label>\
+                                            <input type='radio' value='top' name='BPlayer-danmuku-Position' class='hidden-input BPlayer-danmuku-Position' />\
+                                            <span>顶端</span>\
+                                        </label>\
+                                        <label>\
+                                            <input type='radio' value='scroll' name='BPlayer-danmuku-Position' checked class='hidden-input BPlayer-danmuku-Position' />\
+                                            <span>滚动</span>\
+                                        </label>\
+                                        <label>\
+                                            <input type='radio' value='bottom' name='BPlayer-danmuku-Position' class='hidden-input BPlayer-danmuku-Position' />\
+                                            <span>底端</span>\
+                                        </label>";
+        danmukuColorMenu.innerHTML = "<span>弹幕颜色</span>";
+        for (var i = 0,len=colors.length; i < len; i++) {
+            danmukuColorMenu.innerHTML +=  "<label>\
+                                                <input type='radio' value=" + colors[i] + " name='BPlayer-danmuku-Color' class='hidden-input BPlayer-danmuku-Color'/>\
+                                                <span style='background-color:" + colors[i] + "' ></span>\
+                                            </label>";
+        }
+
+        danmukuStyleMenu.appendChild(danmukuPositionMenu);
+        danmukuStyleMenu.appendChild(danmukuColorMenu);
+        return danmukuStyleMenu;
     }
 
     function _secondToTime(second) {
@@ -198,12 +238,21 @@
         };
 
         danmukuBtn.onclick = function () {
-          var danmukuControler = document.querySelector("#BPlayer-danmuku-controler");
-          if (document.querySelector(".BPlayer-danmuku-controler-hide")) {
-            danmukuControler.className = "BPlayer-danmuku-controler-show";
-          } else{
-            danmukuControler.className = "BPlayer-danmuku-controler-hide";
-          }
+            var danmukuControler = document.querySelector("#BPlayer-danmuku-controler"),
+                danmukuStyleMenu = document.querySelector("#BPlayer-danmuku-styleMenu"),
+                danmukuInput = document.querySelector("#BPlayer-danmuku-input");
+            if (document.querySelector(".BPlayer-danmuku-controler-hide")) {
+                danmukuControler.className = "BPlayer-danmuku-controler-show";
+                setTimeout(function () {
+                    danmukuInput.focus();  
+                },300);
+            } else{
+                danmukuInput.blur();
+                danmukuControler.className = "BPlayer-danmuku-controler-hide";
+                if (danmukuStyleMenu.className === "BPlayer-danmuku-styleMenu-show") {
+                    danmukuStyleMenu.className = "BPlayer-danmuku-styleMenu-hide";
+                }
+            }
         };
         
         controler.appendChild(playBtn);
@@ -383,24 +432,47 @@
             danmukuStyleBtn = document.createElement("div"),
             danmukuInput = document.createElement("input"),
             danmukuShooter = document.createElement("div"),
-            video = document.querySelector("#BPlayer");
+            danmukuStyleMenu = _buildDanmukuStyleMenu(),
+            BPlayer = document.querySelector("#BPlayer"),
+            video = document.querySelector("#BPlayer-video");
 
         danmukuControler.id = "BPlayer-danmuku-controler";
         danmukuStyleBtn.id = "BPlayer-danmuku-style";
         danmukuInput.id = "BPlayer-danmuku-input";
         danmukuShooter.id = "BPlayer-danmuku-shooter";
         danmukuControler.className = "BPlayer-danmuku-controler-hide";
+        danmukuStyleMenu.className = "BPlayer-danmuku-styleMenu-hide";
 
         danmukuStyleBtn.innerHTML = "<i class='iconfont icon-settings' id='BPlayer-danmukuStyleMark'></i>";
         danmukuShooter.innerHTML = "<i class='iconfont icon-send' id='BPlayer-danmukuShooterMark'></i>";
         danmukuInput.type = "text";
-        danmukuInput.placeholder = "输入弹幕，回车发送"
+        danmukuInput.placeholder = "输入弹幕，回车发送";
 
         danmukuControler.appendChild(danmukuStyleBtn);
         danmukuControler.appendChild(danmukuInput);
         danmukuControler.appendChild(danmukuShooter);
-        video.appendChild(danmukuControler);
+        danmukuControler.appendChild(danmukuStyleMenu);
+        BPlayer.appendChild(danmukuControler);
 
+        danmukuStyleBtn.addEventListener("click",function () {
+            if (danmukuStyleMenu.className === "BPlayer-danmuku-styleMenu-hide") {
+                danmukuStyleMenu.className = "BPlayer-danmuku-styleMenu-show";
+            }else{
+                danmukuStyleMenu.className = "BPlayer-danmuku-styleMenu-hide";
+            }
+        });
+
+        danmukuShooter.addEventListener("click",function () {
+            if (video.paused) {
+                video.addEventListener("play",function () {
+                    a.addDanmuku(danmukuInput.value);
+                    danmukuInput.value = "";
+                });
+            }else{
+                a.addDanmuku(danmukuInput.value);
+                danmukuInput.value = "";
+            }
+        });
     };
 
     BulletPlayer.prototype.addDanmuku = function(danmukuOpt) {
