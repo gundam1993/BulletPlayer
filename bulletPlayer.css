@@ -325,7 +325,7 @@
 {
     width: 40px;
     height: 40px;
-    color: #CCC;
+    color: #FFF;
     opacity: 0.8;
     position: absolute;
     top: 0;
@@ -387,7 +387,7 @@
 #BPlayer-danmuku-styleMenu
 {
     width: 380px;
-    background-color: rgba(0,0,0,0.5);
+    background-color: rgba(0,0,0,0.8);
     border-radius: 5px;
     position: absolute;
     left: 50%;
@@ -443,15 +443,20 @@
     justify-content: center;     
 }
 
-.BPlayer-danmuku-Position:checked+span {
+.BPlayer-danmuku-Position+span:hover {
     border: 2px solid #FFF;
     color: #FFF;
+}
+
+.BPlayer-danmuku-Position:checked+span {
+    border: 2px solid #AB3B3A;
+    color: #AB3B3A;
 }
 
 #BPlayer-danmuku-ColorMenu
 {
     width: 100%;
-    padding: 10px 0;
+    padding-top: 10px;
     align-content: center;
     color: #FFF;
     text-align: center;
@@ -477,8 +482,56 @@
     justify-content: center;     
 }
 
+.BPlayer-danmuku-Color+span:hover {  
+    border: 2px solid #FFF;    
+}
+
 .BPlayer-danmuku-Color:checked+span {
-    border: 2px solid #FFF;
+    border: 2px solid #AB3B3A;
+}
+
+#BPlayer-danmuku-OpacityMenu
+{
+    width: 100%;
+    padding-top: 10px;
+    align-content: center;
+    color: #FFF;
+    text-align: center;
+    font-size: 16px;
+}
+
+#BPlayer-danmuku-OpacityMenu>span
+{
+    display: block;
+    line-height: 22px;
+    margin-bottom: 4px;
+}
+
+#BPlayer-danmuku-opacity
+{
+    width: 200px;
+    height: 2px;
+    background-color: #DDD;
+    cursor: pointer;
+    position: relative;
+    margin: 10px auto;
+}
+
+#BPlayer-danmuku-opacity-chosen
+{
+    height: 2px;
+    width: 75%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: #AB3B3A;
+}
+
+#BPlayer-danmuku-opacity-thumb
+{
+    transition: all 0.3s ease-in-out;
+    transform: scale(1) translateX(-50%);
+    left: 100%;
 }
 
 /*弹幕*/

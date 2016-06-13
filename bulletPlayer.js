@@ -19,6 +19,12 @@
         video : "",
         volume : ""
     };
+
+    var _danmuku = {
+        position : "top",
+        color : "#FFF",
+        content : ""
+    };
     
     function _launchFullscreen(element) {
         if(element.requestFullscreen) {
@@ -113,15 +119,27 @@
                                             <span>底端</span>\
                                         </label>";
         danmukuColorMenu.innerHTML = "<span>弹幕颜色</span>";
-        for (var i = 0,len=colors.length; i < len; i++) {
+        danmukuColorMenu.innerHTML +=  "<label>\
+                                                <input type='radio' value=" + colors[0] + " name='BPlayer-danmuku-Color' class='hidden-input BPlayer-danmuku-Color' checked/>\
+                                                <span style='background-color:" + colors[0] + "' ></span>\
+                                            </label>";
+        for (var i = 0,len=colors.length-1; i < len; i++) {
             danmukuColorMenu.innerHTML +=  "<label>\
-                                                <input type='radio' value=" + colors[i] + " name='BPlayer-danmuku-Color' class='hidden-input BPlayer-danmuku-Color'/>\
-                                                <span style='background-color:" + colors[i] + "' ></span>\
+                                                <input type='radio' value=" + colors[i + 1] + " name='BPlayer-danmuku-Color' class='hidden-input BPlayer-danmuku-Color'/>\
+                                                <span style='background-color:" + colors[i + 1] + "' ></span>\
                                             </label>";
         }
 
+        danmukuOpacityMenu.innerHTML = "<span>弹幕透明度</span>\
+                                        <div id='BPlayer-danmuku-opacity'>\
+                                            <div id='BPlayer-danmuku-opacity-chosen'>\
+                                                <span id='BPlayer-danmuku-opacity-thumb' class='BPlayer-thumb'></span>\
+                                            </div>\
+                                        </div>";
+
         danmukuStyleMenu.appendChild(danmukuPositionMenu);
         danmukuStyleMenu.appendChild(danmukuColorMenu);
+        danmukuStyleMenu.appendChild(danmukuOpacityMenu);
         return danmukuStyleMenu;
     }
 
@@ -433,7 +451,7 @@
             danmukuInput = document.createElement("input"),
             danmukuShooter = document.createElement("div"),
             danmukuStyleMenu = _buildDanmukuStyleMenu(),
-            BPlayer = document.querySelector("#BPlayer"),
+            bPlayer = document.querySelector("#BPlayer"),
             video = document.querySelector("#BPlayer-video");
 
         danmukuControler.id = "BPlayer-danmuku-controler";
@@ -452,7 +470,28 @@
         danmukuControler.appendChild(danmukuInput);
         danmukuControler.appendChild(danmukuShooter);
         danmukuControler.appendChild(danmukuStyleMenu);
-        BPlayer.appendChild(danmukuControler);
+        bPlayer.appendChild(danmukuControler);
+
+        var danmukuOpacityChosen = document.querySelector("#BPlayer-danmuku-opacity-chosen"),
+            danmukuOpacity = document.querySelector("#BPlayer-danmuku-opacity"),
+            danmukuOpacityThumb = document.querySelector("#BPlayer-danmuku-opacity-thumb");
+
+        function opacityMove() {
+            var positionX = event.clientX - 300- bPlayer.offsetLeft;
+            if (positionX > danmukuOpacity.offsetWidth) {
+                positionX = danmukuOpacity.offsetWidth;
+            }
+            danmukuOpacityChosen.style.width = positionX + "px";
+        }
+
+        danmukuOpacity.addEventListener("click", opacityMove);
+
+        danmukuOpacityThumb.addEventListener("mousedown", function () {
+            document.addEventListener('mousemove', opacityMove);
+            document.addEventListener('mouseup', function() {
+                document.removeEventListener('mousemove', opacityMove);
+            });
+        });
 
         danmukuStyleBtn.addEventListener("click",function () {
             if (danmukuStyleMenu.className === "BPlayer-danmuku-styleMenu-hide") {
@@ -465,14 +504,35 @@
         danmukuShooter.addEventListener("click",function () {
             if (video.paused) {
                 video.addEventListener("play",function () {
-                    a.addDanmuku(danmukuInput.value);
+                    _danmuku.content = danmukuInput.value;
                     danmukuInput.value = "";
+                    a.addDanmuku(_danmuku);
                 });
             }else{
-                a.addDanmuku(danmukuInput.value);
+                _danmuku.content = danmukuInput.value;
                 danmukuInput.value = "";
+                a.addDanmuku(_danmuku);
             }
         });
+
+        this.setDanmukuStyle();
+    };
+
+    BulletPlayer.prototype.setDanmukuStyle = function() {
+        var danmukuPositionMenu = document.querySelector("#BPlayer-danmuku-PositionMenu"),
+            danmukuColorMenu = document.querySelector("#BPlayer-danmuku-ColorMenu"),
+            danmukuStyleBtn = document.querySelector("#BPlayer-danmuku-style");
+        danmukuPositionMenu.addEventListener("click",function () {
+            if (event.target.value) {
+                _danmuku.position = event.target.value;
+            }
+        });
+        danmukuColorMenu.addEventListener("click",function () {
+            if (event.target.value) {
+                _danmuku.color = event.target.value;
+                danmukuStyleBtn.style.color = event.target.value;
+            }
+        });      
     };
 
     BulletPlayer.prototype.addDanmuku = function(danmukuOpt) {
@@ -480,8 +540,8 @@
             danmukuItem = document.createElement("div");
 
     danmukuItem.className = "BPlayer-danmuku-item";
-    danmukuItem.innerHTML = danmukuOpt;
-    danmukuItem.style.color = "#FFF";
+    danmukuItem.innerHTML = danmukuOpt.content;
+    danmukuItem.style.color = danmukuOpt.color;
 
     danmukuArea.appendChild(danmukuItem);
     danmukuItem.style.top = 0;
