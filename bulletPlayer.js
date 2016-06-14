@@ -183,12 +183,6 @@
         this.initPlayState();
         this.initVolumeState();
         this.addDanmukuControler();
-        
-        /*
-        setInterval(function () {
-            a.addDanmuku(123654);
-        },200);
-        */
     };
     
     BulletPlayer.prototype.addVideo = function(videoUrl,posterUrl) {
@@ -212,6 +206,7 @@
         player.appendChild(video);
         player.appendChild(danmukuArea);
         this.container.appendChild(player);
+
     };
 
     BulletPlayer.prototype.addControler = function() {
@@ -503,11 +498,12 @@
 
         danmukuShooter.addEventListener("click",function () {
             if (video.paused) {
+                var value = danmukuInput.value;
                 video.addEventListener("play",function () {
-                    _danmuku.content = danmukuInput.value;
-                    danmukuInput.value = "";
+                    _danmuku.content = value;
                     a.addDanmuku(_danmuku);
                 });
+                danmukuInput.value = "";
             }else{
                 _danmuku.content = danmukuInput.value;
                 danmukuInput.value = "";
@@ -521,7 +517,10 @@
     BulletPlayer.prototype.setDanmukuStyle = function() {
         var danmukuPositionMenu = document.querySelector("#BPlayer-danmuku-PositionMenu"),
             danmukuColorMenu = document.querySelector("#BPlayer-danmuku-ColorMenu"),
-            danmukuStyleBtn = document.querySelector("#BPlayer-danmuku-style");
+            danmukuStyleBtn = document.querySelector("#BPlayer-danmuku-style"),
+            danmukuOpacity = document.querySelector("#BPlayer-danmuku-opacity"),
+            danmukuOpacityChosen = document.querySelector("#BPlayer-danmuku-opacity-chosen"),
+            danmukuArea = document.querySelector("#BPlayer-danmukuArea");
         danmukuPositionMenu.addEventListener("click",function () {
             if (event.target.value) {
                 _danmuku.position = event.target.value;
@@ -532,23 +531,63 @@
                 _danmuku.color = event.target.value;
                 danmukuStyleBtn.style.color = event.target.value;
             }
+        });
+        danmukuOpacity.addEventListener("click",function () {
+            danmukuArea.style.opacity = (danmukuOpacityChosen.offsetWidth / danmukuOpacity.offsetWidth);
         });      
     };
 
     BulletPlayer.prototype.addDanmuku = function(danmukuOpt) {
         var danmukuArea = document.querySelector("#BPlayer-danmukuArea"),
-            danmukuItem = document.createElement("div");
+            danmukuItem = document.createElement("div"),
+            canvas = document.querySelector("#BPlayer-danmuku-canvas"),
+            text = {};
 
+            text.content = danmukuOpt.content;
+            text.color = danmukuOpt.color;
+        if (!canvas) {
+            danmukuArea.innerHTML = "<canvas id='BPlayer-danmuku-canvas' width='" + danmukuArea.offsetWidth + "px' height='" + danmukuArea.offsetHeight + "px' style='width:" + danmukuArea.offsetWidth + "px;height:" + danmukuArea.offsetHeight + "px;'></canvas>";
+            canvas = document.querySelector("#BPlayer-danmuku-canvas");
+        }
+
+        var ctx = canvas.getContext("2d");
+        ctx.font = "20px Arial bold";
+        ctx.fillStyle = text.color;
+        ctx.fillText(text.content,width,20);
+
+        var width = danmukuArea.offsetWidth,
+            length = ctx.measureText(danmukuOpt.content).width;
+
+        function step() {
+        ctx.clearRect(width,0,danmukuArea.offsetWidth,danmukuArea.offsetHeight);
+        width -= (danmukuArea.offsetWidth / 300);
+        ctx.fillStyle = text.color;
+        ctx.fillText(text.content,width,20);
+        if (width > -length) {
+            requestAnimationFrame(step);
+        }else{
+            ctx.clearRect(-length,0,0,danmukuArea.offsetHeight);
+        }
+    }
+
+    var animations = requestAnimationFrame(step);
+    /*
     danmukuItem.className = "BPlayer-danmuku-item";
     danmukuItem.innerHTML = danmukuOpt.content;
     danmukuItem.style.color = danmukuOpt.color;
 
     danmukuArea.appendChild(danmukuItem);
+
     danmukuItem.style.top = 0;
+    setTimeout(function () {
+        danmukuItem.remove();
+    },5000);
+    /*
     var width = -danmukuItem.offsetWidth,
         end  = danmukuArea.offsetWidth + danmukuItem.offsetWidth;
     danmukuItem.style.right = width + "px";
 
+    
     function step() {
         width += (end / 300);
         danmukuItem.style.right = width + "px";
@@ -559,7 +598,10 @@
         }
     }
 
-    var animations = requestAnimationFrame(step);
+    var animations = requestAnimationFrame(step);*/
+
+
+
     };
     
     /************* 以上是本库提供的公有方法 *************/

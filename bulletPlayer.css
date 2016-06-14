@@ -510,7 +510,7 @@
 #BPlayer-danmuku-opacity
 {
     width: 200px;
-    height: 2px;
+    height: 4px;
     background-color: #DDD;
     cursor: pointer;
     position: relative;
@@ -519,7 +519,7 @@
 
 #BPlayer-danmuku-opacity-chosen
 {
-    height: 2px;
+    height: 4px;
     width: 75%;
     position: absolute;
     top: 0;
@@ -545,6 +545,12 @@
     overflow: hidden;
 }
 
+#BPlayer-danmuku-canvas
+{
+    width: 100%;
+    height: 100%;
+}
+
 .BPlayer-danmuku-item
 {
     font-size: 30px;
@@ -558,5 +564,33 @@
     white-space: nowrap;
     font-weight: bolder;
     text-shadow: .5px .5px .5px rgba(0,0,0,.5);
-    transition: transform 
+    animation: danmuku 5s linear;
+    -moz-animation: danmuku 5s linear; /* Firefox */
+    -webkit-animation: danmuku 5s linear;  /* Safari 和 Chrome */
+    -o-animation: danmuku 5s linear;   /* Opera */
+    will-change: transform;
+}
+
+@keyframes danmuku
+{
+from {transform: translateX(800px);}
+to {transform: translateX(-100%)}
+}
+
+@-moz-keyframes danmuku /* Firefox */
+{
+from {transform: translateX(100%);}
+to {transform: translateX(0%)}
+}
+
+@-webkit-keyframes danmuku /* Safari 和 Chrome */
+{
+from {transform: translateX(100%);}
+to {transform: translateX(0%)}
+}
+
+@-o-keyframes danmuku /* Opera */
+{
+from {transform: translateX(100%);}
+to {transform: translateX(0%)}
 }
