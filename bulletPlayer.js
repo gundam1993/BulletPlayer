@@ -21,9 +21,10 @@
     };
 
     var _danmuku = {
-        position : "top",
+        position : "scroll",
         color : "#FFF",
-        content : ""
+        content : "",
+        height : 0
     };
     
     function _launchFullscreen(element) {
@@ -166,6 +167,28 @@
                 video.pause();
                 btnMark.className = 'iconfont icon-playarrow'; 
             }
+    }
+
+    function _scrollStartPositionCheck(danmukuArea,ctx) {
+        var imgData=ctx.getImageData(danmukuArea.offsetWidth-50,_danmuku.height,danmukuArea.offsetWidth,_danmuku.height+25),
+            changeline = false;
+        for (var i = 0; i < imgData.data.length; i+= 4) {
+            if (imgData.data[i+3] !== 0) {
+                changeline =  true;
+                break;
+            }
+        }
+        if (changeline) {
+            if (_danmuku.height > (danmukuArea.offsetHeigh - 25)) {
+                _danmuku.height = 0;
+                return;
+            }else{
+                _danmuku.height +=25;
+                _scrollStartPositionCheck(danmukuArea,ctx);
+            }
+        }else{
+            return;
+        }
     }
     /************* 以下是本库提供的公有方法 *************/
     BulletPlayer.prototype.setVideo = function(videoUrl,posterUrl,opt) {
@@ -497,6 +520,7 @@
         });
 
         danmukuShooter.addEventListener("click",function () {
+            /*
             if (video.paused) {
                 var value = danmukuInput.value;
                 video.addEventListener("play",function () {
@@ -508,6 +532,19 @@
                 _danmuku.content = danmukuInput.value;
                 danmukuInput.value = "";
                 a.addDanmuku(_danmuku);
+            }*/
+            if (_danmuku.position == "scroll") {
+                _danmuku.content = danmukuInput.value;
+                danmukuInput.value = "";
+                a.addDanmukuScroll(_danmuku);
+            }else if (_danmuku.position == "top") {
+                _danmuku.content = danmukuInput.value;
+                danmukuInput.value = "";
+                a.addDanmukuTop(_danmuku);
+            }else{
+               _danmuku.content = danmukuInput.value;
+                danmukuInput.value = "";
+                a.addDanmukuBottom(_danmuku); 
             }
         });
 
@@ -521,6 +558,7 @@
             danmukuOpacity = document.querySelector("#BPlayer-danmuku-opacity"),
             danmukuOpacityChosen = document.querySelector("#BPlayer-danmuku-opacity-chosen"),
             danmukuArea = document.querySelector("#BPlayer-danmukuArea");
+            danmukuArea.style.opacity = (danmukuOpacityChosen.offsetWidth / danmukuOpacity.offsetWidth);
         danmukuPositionMenu.addEventListener("click",function () {
             if (event.target.value) {
                 _danmuku.position = event.target.value;
@@ -537,71 +575,166 @@
         });      
     };
 
-    BulletPlayer.prototype.addDanmuku = function(danmukuOpt) {
+    BulletPlayer.prototype.setCanvas = function() {
+        var danmukuArea = document.querySelector("#BPlayer-danmukuArea");
+        danmukuArea.innerHTML += "<canvas id='BPlayer-danmuku-canvas-top' width='" + danmukuArea.offsetWidth + "px' height='" + danmukuArea.offsetHeight + "px' style='width:" + danmukuArea.offsetWidth + "px;height:" + danmukuArea.offsetHeight + "px;'></canvas>";
+        danmukuArea.innerHTML += "<canvas id='BPlayer-danmuku-canvas-scroll' width='" + danmukuArea.offsetWidth + "px' height='" + danmukuArea.offsetHeight + "px' style='width:" + danmukuArea.offsetWidth + "px;height:" + danmukuArea.offsetHeight + "px;'></canvas>";
+        danmukuArea.innerHTML += "<canvas id='BPlayer-danmuku-canvas-bottom' width='" + danmukuArea.offsetWidth + "px' height='" + danmukuArea.offsetHeight + "px' style='width:" + danmukuArea.offsetWidth + "px;height:" + danmukuArea.offsetHeight + "px;'></canvas>";
+    };
+
+    BulletPlayer.prototype.addDanmukuScroll = function(danmukuOpt) {
         var danmukuArea = document.querySelector("#BPlayer-danmukuArea"),
             danmukuItem = document.createElement("div"),
-            canvas = document.querySelector("#BPlayer-danmuku-canvas"),
-            text = {};
+            canvas = document.querySelector("#BPlayer-danmuku-canvas-scroll"),
+            video = document.querySelector("#BPlayer-video"),
+            opt = {};
 
-            text.content = danmukuOpt.content;
-            text.color = danmukuOpt.color;
-        if (!canvas) {
-            danmukuArea.innerHTML = "<canvas id='BPlayer-danmuku-canvas' width='" + danmukuArea.offsetWidth + "px' height='" + danmukuArea.offsetHeight + "px' style='width:" + danmukuArea.offsetWidth + "px;height:" + danmukuArea.offsetHeight + "px;'></canvas>";
-            canvas = document.querySelector("#BPlayer-danmuku-canvas");
-        }
+            if (!canvas) {
+                this.setCanvas();
+                canvas = document.querySelector("#BPlayer-danmuku-canvas-scroll");
+            }
 
+            opt.content = danmukuOpt.content;
+            opt.color = danmukuOpt.color;
+            opt.position = danmukuOpt.position;
+        
         var ctx = canvas.getContext("2d");
-        ctx.font = "20px Arial bold";
-        ctx.fillStyle = text.color;
-        ctx.fillText(text.content,width,20);
-
+        _scrollStartPositionCheck(danmukuArea,ctx);
         var width = danmukuArea.offsetWidth,
-            length = ctx.measureText(danmukuOpt.content).width;
+            length,
+            animations,
+            height = _danmuku.height;
+        ctx.font = "25px Arial bold";
+        ctx.fillStyle = opt.color;
+        console.log(height);
 
-        function step() {
-        ctx.clearRect(width,0,danmukuArea.offsetWidth,danmukuArea.offsetHeight);
-        width -= (danmukuArea.offsetWidth / 300);
-        ctx.fillStyle = text.color;
-        ctx.fillText(text.content,width,20);
-        if (width > -length) {
-            requestAnimationFrame(step);
-        }else{
-            ctx.clearRect(-length,0,0,danmukuArea.offsetHeight);
+        length = ctx.measureText(opt.content).width;
+        ctx.textBaseline="hanging";
+        ctx.fillText(opt.content,width,height);
+        _danmuku.height = 0;
+        function stepScroll() {
+            ctx.clearRect(width,height,danmukuArea.offsetWidth,height + 25);
+            width -= (danmukuArea.offsetWidth / 300);
+            ctx.textBaseline="hanging";
+            ctx.fillStyle = opt.color;
+            ctx.fillText(opt.content,width,height);
+            if (width > -length) {
+                animations = requestAnimationFrame(stepScroll);
+            }else{
+                window.cancelAnimationFrame(animations);
+                ctx.clearRect(-length,height,0,height + 25);
+            }
         }
-    }
+        animations = requestAnimationFrame(stepScroll);
 
-    var animations = requestAnimationFrame(step);
-    /*
-    danmukuItem.className = "BPlayer-danmuku-item";
-    danmukuItem.innerHTML = danmukuOpt.content;
-    danmukuItem.style.color = danmukuOpt.color;
+        video.addEventListener("pause",function () {
+            window.cancelAnimationFrame(animations);
+        });
 
-    danmukuArea.appendChild(danmukuItem);
+        video.addEventListener("play",function () {
+            animations = requestAnimationFrame(stepScroll);
+        });
+    };
 
-    danmukuItem.style.top = 0;
-    setTimeout(function () {
-        danmukuItem.remove();
-    },5000);
-    /*
-    var width = -danmukuItem.offsetWidth,
-        end  = danmukuArea.offsetWidth + danmukuItem.offsetWidth;
-    danmukuItem.style.right = width + "px";
+    BulletPlayer.prototype.addDanmukuTop = function(danmukuOpt) {
+        var danmukuArea = document.querySelector("#BPlayer-danmukuArea"),
+            danmukuItem = document.createElement("div"),
+            canvas = document.querySelector("#BPlayer-danmuku-canvas-top"),
+            video = document.querySelector("#BPlayer-video"),
+            opt = {};
 
-    
-    function step() {
-        width += (end / 300);
-        danmukuItem.style.right = width + "px";
-        if (width < end) {
-            requestAnimationFrame(step);
-        }else{
-            danmukuItem.remove();
+            if (!canvas) {
+                this.setCanvas();
+                canvas = document.querySelector("#BPlayer-danmuku-canvas-top");
+            }
+
+            opt.content = danmukuOpt.content;
+            opt.color = danmukuOpt.color;
+            opt.position = danmukuOpt.position;
+        
+        var ctx = canvas.getContext("2d");
+        _scrollStartPositionCheck(danmukuArea,ctx);
+        var width = danmukuArea.offsetWidth,
+            length,
+            animations,
+            height = _danmuku.height;
+        ctx.font = "25px Arial bold";
+        ctx.fillStyle = opt.color;
+        console.log(height);
+
+        length = ctx.measureText(opt.content).width;
+        ctx.textBaseline="hanging";
+        ctx.fillText(opt.content,(width - length)/2,0);
+        var count = 0;
+        function stepTop() {
+            ctx.clearRect((width - length)/2,0,(width + length)/2,45);
+            ctx.fillStyle = opt.color;
+            ctx.textBaseline="hanging";
+            ctx.fillText(opt.content,(width - length)/2,0);
+            count ++;
+            if (count < 300) {
+                animationsTop = requestAnimationFrame(stepTop);
+            }else{
+                ctx.clearRect((width - length)/2,0,(width + length)/2,45);
+            }
         }
-    }
+        var animationsTop = requestAnimationFrame(stepTop);
+        video.addEventListener("pause",function () {
+            window.cancelAnimationFrame(animationsTop);
+        });
 
-    var animations = requestAnimationFrame(step);*/
+        video.addEventListener("play",function () {
+            animations = requestAnimationFrame(stepTop);
+        });
+    };
 
+    BulletPlayer.prototype.addDanmukuBottom = function(danmukuOpt) {
+        var danmukuArea = document.querySelector("#BPlayer-danmukuArea"),
+            danmukuItem = document.createElement("div"),
+            canvas = document.querySelector("#BPlayer-danmuku-canvas-bottom"),
+            video = document.querySelector("#BPlayer-video"),
+            opt = {};
 
+            if (!canvas) {
+                this.setCanvas();
+                canvas = document.querySelector("#BPlayer-danmuku-canvas-bottom");
+            }
 
+            opt.content = danmukuOpt.content;
+            opt.color = danmukuOpt.color;
+            opt.position = danmukuOpt.position;
+        
+        var ctx = canvas.getContext("2d");
+        _scrollStartPositionCheck(danmukuArea,ctx);
+        var width = danmukuArea.offsetWidth,
+            length,
+            animations,
+            height = _danmuku.height;
+        ctx.font = "25px Arial bold";
+        ctx.fillStyle = opt.color;
+
+        length = ctx.measureText(opt.content).width;
+        ctx.fillText(opt.content,(width - length)/2,danmukuArea.offsetHeight - 25);
+        var countb = 0;
+        function stepBottom() {
+            ctx.clearRect((width - length)/2,danmukuArea.offsetHeight - 55,(width + length)/2,danmukuArea.offsetHeight);
+            ctx.fillStyle = opt.color;
+            ctx.fillText(opt.content,(width - length)/2,danmukuArea.offsetHeight - 25);
+            countb ++;
+            if (countb < 300) {
+                animationsBottom = requestAnimationFrame(stepBottom);
+            }else{
+                ctx.clearRect((width - length)/2,danmukuArea.offsetHeight - 55,(width + length)/2,danmukuArea.offsetHeight);
+            }
+        }
+        var animationsBottom = requestAnimationFrame(stepBottom);
+        video.addEventListener("pause",function () {
+            window.cancelAnimationFrame(animationsBottom);
+        });
+
+        video.addEventListener("play",function () {
+            animations = requestAnimationFrame(stepBottom);
+        });
     };
     
     /************* 以上是本库提供的公有方法 *************/
