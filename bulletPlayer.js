@@ -24,7 +24,9 @@
         position : "scroll",
         color : "#FFF",
         content : "",
-        height : 0
+        scrollY : 0,
+        topY : 0,
+        bottomY : 0
     };
     
     function _launchFullscreen(element) {
@@ -169,26 +171,14 @@
             }
     }
 
-    function _scrollStartPositionCheck(danmukuArea,ctx) {
-        var imgData=ctx.getImageData(danmukuArea.offsetWidth-50,_danmuku.height,danmukuArea.offsetWidth,_danmuku.height+25),
-            changeline = false;
-        for (var i = 0; i < imgData.data.length; i+= 4) {
-            if (imgData.data[i+3] !== 0) {
-                changeline =  true;
-                break;
-            }
-        }
-        if (changeline) {
-            if (_danmuku.height > (danmukuArea.offsetHeigh - 25)) {
-                _danmuku.height = 0;
-                return;
-            }else{
-                _danmuku.height +=25;
-                _scrollStartPositionCheck(danmukuArea,ctx);
-            }
-        }else{
-            return;
-        }
+    function _preload(opt) {
+        var danmukuItem = document.createElement('div');
+        danmukuItem.className = "BPlayer-danmuku-items";
+        danmukuItem.innerHTML = opt.content;
+        danmukuItem.style.color = opt.color;
+        danmukuItem.height = 26;
+
+        return danmukuItem;
     }
     /************* 以下是本库提供的公有方法 *************/
     BulletPlayer.prototype.setVideo = function(videoUrl,posterUrl,opt) {
@@ -206,6 +196,7 @@
         this.initPlayState();
         this.initVolumeState();
         this.addDanmukuControler();
+        this.keyBoardEvent();
     };
     
     BulletPlayer.prototype.addVideo = function(videoUrl,posterUrl) {
@@ -262,14 +253,11 @@
         timer.innerHTML = "<span id='BPlayer-timer-played'>00:00</span>/<span id='BPlayer-timer-length'>00:00</span>";    
 
         fullscreenBtn.onclick = function () {
-            var fullscreenElement = document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement,
-                fullscreenMark = document.querySelector("#BPlayer-fullscreenMark");
+            var fullscreenElement = document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement;
             if (!fullscreenElement) {
                 _launchFullscreen(player);
-                fullscreenMark.className = "iconfont icon-fullscreenexit";
             }else{
                 _exitFullscreen();
-                fullscreenMark.className = "iconfont icon-fullscreen";
             }
         };
 
@@ -519,34 +507,7 @@
             }
         });
 
-        danmukuShooter.addEventListener("click",function () {
-            /*
-            if (video.paused) {
-                var value = danmukuInput.value;
-                video.addEventListener("play",function () {
-                    _danmuku.content = value;
-                    a.addDanmuku(_danmuku);
-                });
-                danmukuInput.value = "";
-            }else{
-                _danmuku.content = danmukuInput.value;
-                danmukuInput.value = "";
-                a.addDanmuku(_danmuku);
-            }*/
-            if (_danmuku.position == "scroll") {
-                _danmuku.content = danmukuInput.value;
-                danmukuInput.value = "";
-                a.addDanmukuScroll(_danmuku);
-            }else if (_danmuku.position == "top") {
-                _danmuku.content = danmukuInput.value;
-                danmukuInput.value = "";
-                a.addDanmukuTop(_danmuku);
-            }else{
-               _danmuku.content = danmukuInput.value;
-                danmukuInput.value = "";
-                a.addDanmukuBottom(_danmuku); 
-            }
-        });
+        danmukuShooter.addEventListener("click",this.addDanmuku.bind(this,_danmuku));
 
         this.setDanmukuStyle();
     };
@@ -575,54 +536,75 @@
         });      
     };
 
-    BulletPlayer.prototype.setCanvas = function() {
-        var danmukuArea = document.querySelector("#BPlayer-danmukuArea");
-        danmukuArea.innerHTML += "<canvas id='BPlayer-danmuku-canvas-top' width='" + danmukuArea.offsetWidth + "px' height='" + danmukuArea.offsetHeight + "px' style='width:" + danmukuArea.offsetWidth + "px;height:" + danmukuArea.offsetHeight + "px;'></canvas>";
-        danmukuArea.innerHTML += "<canvas id='BPlayer-danmuku-canvas-scroll' width='" + danmukuArea.offsetWidth + "px' height='" + danmukuArea.offsetHeight + "px' style='width:" + danmukuArea.offsetWidth + "px;height:" + danmukuArea.offsetHeight + "px;'></canvas>";
-        danmukuArea.innerHTML += "<canvas id='BPlayer-danmuku-canvas-bottom' width='" + danmukuArea.offsetWidth + "px' height='" + danmukuArea.offsetHeight + "px' style='width:" + danmukuArea.offsetWidth + "px;height:" + danmukuArea.offsetHeight + "px;'></canvas>";
+    BulletPlayer.prototype.addDanmuku = function(danmuku) {
+        var video = document.querySelector("#BPlayer-video"),
+            danmukuInput = document.querySelector("#BPlayer-danmuku-input");
+            danmuku.content = danmukuInput.value;
+            danmukuInput.value = "";
+        if (video.paused) {
+            video.addEventListener("play",function () {
+                if (danmuku.position == "scroll") {
+                    this.addDanmukuScroll(danmuku);
+                }else if (danmuku.position == "top") {
+                    this.addDanmukuTop(danmuku);
+                }else{
+                    this.addDanmukuBottom(danmuku); 
+                }   
+            }.bind(this,danmuku));
+        }else{
+            if (danmuku.position == "scroll") {
+                this.addDanmukuScroll(danmuku);
+            }else if (danmuku.position == "top") {
+                this.addDanmukuTop(danmuku);
+            }else{
+                this.addDanmukuBottom(danmuku); 
+            }
+        }
     };
+
 
     BulletPlayer.prototype.addDanmukuScroll = function(danmukuOpt) {
         var danmukuArea = document.querySelector("#BPlayer-danmukuArea"),
-            danmukuItem = document.createElement("div"),
-            canvas = document.querySelector("#BPlayer-danmuku-canvas-scroll"),
             video = document.querySelector("#BPlayer-video"),
             opt = {};
 
-            if (!canvas) {
-                this.setCanvas();
-                canvas = document.querySelector("#BPlayer-danmuku-canvas-scroll");
-            }
 
             opt.content = danmukuOpt.content;
             opt.color = danmukuOpt.color;
             opt.position = danmukuOpt.position;
+            opt.scrollY = danmukuOpt.scrollY;
         
-        var ctx = canvas.getContext("2d");
-        _scrollStartPositionCheck(danmukuArea,ctx);
-        var width = danmukuArea.offsetWidth,
-            length,
+        var danmuku = _preload(opt),
+            x = danmukuArea.offsetWidth,
+            y = opt.scrollY,
+            width,
+            height = danmuku.height,
+            step = x / 300,
             animations,
-            height = _danmuku.height;
-        ctx.font = "25px Arial bold";
-        ctx.fillStyle = opt.color;
-        console.log(height);
+            count = 0;
 
-        length = ctx.measureText(opt.content).width;
-        ctx.textBaseline="hanging";
-        ctx.fillText(opt.content,width,height);
-        _danmuku.height = 0;
+        danmuku.className = "BPlayer-danmuku-items BPlayer-danmuku-items-scroll";
+        danmukuArea.appendChild(danmuku);
+        width = danmuku.offsetWidth;
+        danmuku.style.top = y + "px";
+        danmuku.style.left = - width + "px";
+
+        if (y < (danmukuArea.offsetHeight - height)) {
+            danmukuOpt.scrollY += height;
+        }else{
+            danmukuOpt.scrollY = 0;
+        }
+
         function stepScroll() {
-            ctx.clearRect(width,height,danmukuArea.offsetWidth,height + 25);
-            width -= (danmukuArea.offsetWidth / 300);
-            ctx.textBaseline="hanging";
-            ctx.fillStyle = opt.color;
-            ctx.fillText(opt.content,width,height);
-            if (width > -length) {
+            if (count < 300) {
+                count ++;
                 animations = requestAnimationFrame(stepScroll);
             }else{
+                if (y < danmukuOpt.topY) {
+                    danmukuOpt.scrollY = y;
+                }
                 window.cancelAnimationFrame(animations);
-                ctx.clearRect(-length,height,0,height + 25);
+                danmuku.remove();
             }
         }
         animations = requestAnimationFrame(stepScroll);
@@ -638,49 +620,50 @@
 
     BulletPlayer.prototype.addDanmukuTop = function(danmukuOpt) {
         var danmukuArea = document.querySelector("#BPlayer-danmukuArea"),
-            danmukuItem = document.createElement("div"),
-            canvas = document.querySelector("#BPlayer-danmuku-canvas-top"),
             video = document.querySelector("#BPlayer-video"),
             opt = {};
-
-            if (!canvas) {
-                this.setCanvas();
-                canvas = document.querySelector("#BPlayer-danmuku-canvas-top");
-            }
 
             opt.content = danmukuOpt.content;
             opt.color = danmukuOpt.color;
             opt.position = danmukuOpt.position;
+            opt.topY = danmukuOpt.topY;
         
-        var ctx = canvas.getContext("2d");
-        _scrollStartPositionCheck(danmukuArea,ctx);
-        var width = danmukuArea.offsetWidth,
-            length,
+        var danmuku = _preload(opt),
+            width,
+            height = danmuku.height,
+            x,
+            y = opt.topY,
             animations,
-            height = _danmuku.height;
-        ctx.font = "25px Arial bold";
-        ctx.fillStyle = opt.color;
-        console.log(height);
+            count = 0;
 
-        length = ctx.measureText(opt.content).width;
-        ctx.textBaseline="hanging";
-        ctx.fillText(opt.content,(width - length)/2,0);
-        var count = 0;
+        danmukuArea.appendChild(danmuku);
+        width = danmuku.offsetWidth;
+        x = (danmukuArea.offsetWidth - width) / 2;
+        danmuku.style.left = x + "px";
+        danmuku.style.top = y + "px";
+
+        if (y < (danmukuArea.offsetHeight - height)) {
+            danmukuOpt.topY += height;
+        }else{
+            danmukuOpt.topY = 0;
+        }
+
         function stepTop() {
-            ctx.clearRect((width - length)/2,0,(width + length)/2,45);
-            ctx.fillStyle = opt.color;
-            ctx.textBaseline="hanging";
-            ctx.fillText(opt.content,(width - length)/2,0);
-            count ++;
             if (count < 300) {
-                animationsTop = requestAnimationFrame(stepTop);
+                count ++;
+                animations = requestAnimationFrame(stepTop);
             }else{
-                ctx.clearRect((width - length)/2,0,(width + length)/2,45);
+                if (y < danmukuOpt.topY) {
+                    danmukuOpt.topY = y;
+                }
+                window.cancelAnimationFrame(animations);
+                danmuku.remove();
             }
         }
-        var animationsTop = requestAnimationFrame(stepTop);
+        animations = requestAnimationFrame(stepTop);
+
         video.addEventListener("pause",function () {
-            window.cancelAnimationFrame(animationsTop);
+            window.cancelAnimationFrame(animations);
         });
 
         video.addEventListener("play",function () {
@@ -689,54 +672,99 @@
     };
 
     BulletPlayer.prototype.addDanmukuBottom = function(danmukuOpt) {
-        var danmukuArea = document.querySelector("#BPlayer-danmukuArea"),
-            danmukuItem = document.createElement("div"),
-            canvas = document.querySelector("#BPlayer-danmuku-canvas-bottom"),
+         var danmukuArea = document.querySelector("#BPlayer-danmukuArea"),
             video = document.querySelector("#BPlayer-video"),
             opt = {};
-
-            if (!canvas) {
-                this.setCanvas();
-                canvas = document.querySelector("#BPlayer-danmuku-canvas-bottom");
-            }
 
             opt.content = danmukuOpt.content;
             opt.color = danmukuOpt.color;
             opt.position = danmukuOpt.position;
+            opt.bottomY = danmukuOpt.bottomY;
         
-        var ctx = canvas.getContext("2d");
-        _scrollStartPositionCheck(danmukuArea,ctx);
-        var width = danmukuArea.offsetWidth,
-            length,
+        var danmuku = _preload(opt),
+            width,
+            height = danmuku.height,
+            x,
+            y = opt.bottomY,
             animations,
-            height = _danmuku.height;
-        ctx.font = "25px Arial bold";
-        ctx.fillStyle = opt.color;
+            count = 0;
 
-        length = ctx.measureText(opt.content).width;
-        ctx.fillText(opt.content,(width - length)/2,danmukuArea.offsetHeight - 25);
-        var countb = 0;
+        danmukuArea.appendChild(danmuku);
+        width = danmuku.offsetWidth;
+        x = (danmukuArea.offsetWidth - width) / 2;
+        danmuku.style.left = x + "px";
+        danmuku.style.bottom = y + "px";
+
+        if (y < (danmukuArea.offsetHeight - height)) {
+            danmukuOpt.bottomY += height;
+        }else{
+            danmukuOpt.bottomY = 0;
+        }
+
         function stepBottom() {
-            ctx.clearRect((width - length)/2,danmukuArea.offsetHeight - 55,(width + length)/2,danmukuArea.offsetHeight);
-            ctx.fillStyle = opt.color;
-            ctx.fillText(opt.content,(width - length)/2,danmukuArea.offsetHeight - 25);
-            countb ++;
-            if (countb < 300) {
-                animationsBottom = requestAnimationFrame(stepBottom);
+            if (count < 300) {
+                count ++;
+                animations = requestAnimationFrame(stepBottom);
             }else{
-                ctx.clearRect((width - length)/2,danmukuArea.offsetHeight - 55,(width + length)/2,danmukuArea.offsetHeight);
+                if (y < danmukuOpt.bottomY) {
+                    danmukuOpt.bottomY = y;
+                }
+                window.cancelAnimationFrame(animations);
+                danmuku.remove();
             }
         }
-        var animationsBottom = requestAnimationFrame(stepBottom);
+        animations = requestAnimationFrame(stepBottom);
+
         video.addEventListener("pause",function () {
-            window.cancelAnimationFrame(animationsBottom);
+            window.cancelAnimationFrame(animations);
         });
 
         video.addEventListener("play",function () {
-            animations = requestAnimationFrame(stepBottom);
+            animations = requestAnimationFrame(stepTop);
         });
     };
     
+    BulletPlayer.prototype.keyBoardEvent = function() {
+        var video = document.querySelector("#BPlayer-video"),
+            BPlayer = document.querySelector("#BPlayer"),
+            danmukuInput = document.querySelector("#BPlayer-danmuku-input");
+        danmukuInput.addEventListener("keypress", function () {
+            if (event.keyCode === 13) {
+                this.addDanmuku(_danmuku);
+            }
+        }.bind(this));
+
+        document.addEventListener("keydown",function () {
+            var video = document.querySelector("#BPlayer-video"),
+                volumeBarInner = document.querySelector("#BPlayer-volumeBar-inner");
+            switch (event.keyCode) {
+                case 9 :
+                    event.preventDefault();
+                    break;
+                case 39 :
+                    video.currentTime += 10;
+                    break;
+                case 37 :
+                    video.currentTime -= 10;
+                    break;
+                case 38 :
+                    video.volume += 0.1;
+                    volumeBarInner.style.width = video.volume * 100 + "%";
+                    break;
+                case 40 :
+                    video.volume -= 0.1;
+                    volumeBarInner.style.width = video.volume * 100 + "%";
+                    break;
+                case 32 :
+                    _playStateChange();
+                    break;
+            }
+
+        });
+    };
+
+
+
     /************* 以上是本库提供的公有方法 *************/
 
 

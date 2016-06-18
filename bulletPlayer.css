@@ -551,49 +551,7 @@
     height: 100%;
 }
 
-.BPlayer-danmuku-item
-{
-    font-size: 30px;
-    display: inline-block;
-    position: absolute;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    cursor: default;
-    white-space: nowrap;
-    font-weight: bolder;
-    text-shadow: .5px .5px .5px rgba(0,0,0,.5);
-    animation: danmuku 5s linear;
-    -moz-animation: danmuku 5s linear; /* Firefox */
-    -webkit-animation: danmuku 5s linear;  /* Safari 和 Chrome */
-    -o-animation: danmuku 5s linear;   /* Opera */
-    will-change: transform;
-}
 
-@keyframes danmuku
-{
-from {transform: translateX(800px);}
-to {transform: translateX(-100%)}
-}
-
-@-moz-keyframes danmuku /* Firefox */
-{
-from {transform: translateX(100%);}
-to {transform: translateX(0%)}
-}
-
-@-webkit-keyframes danmuku /* Safari 和 Chrome */
-{
-from {transform: translateX(100%);}
-to {transform: translateX(0%)}
-}
-
-@-o-keyframes danmuku /* Opera */
-{
-from {transform: translateX(100%);}
-to {transform: translateX(0%)}
-}
 
 #BPlayer-danmuku-canvas-top,#BPlayer-danmuku-canvas-scroll,#BPlayer-danmuku-canvas-bottom
 {
@@ -602,4 +560,24 @@ to {transform: translateX(0%)}
     position: absolute;
     top: 0;
     left: 0;
+}
+
+.BPlayer-danmuku-items
+{
+    position: absolute;
+    font-size: 25px;
+    font-family: Arial;
+    font-weight: bold;
+    text-align: center;
+    height: 26px;
+    transition: all 5s linear;
+    cursor: default;
+    white-space: nowrap;
+    font-weight: bolder;
+    text-shadow: .5px .5px .5px rgba(0,0,0,.5);
+}
+
+.BPlayer-danmuku-items-scroll
+{
+    left: 100%;
 }
