@@ -7,7 +7,7 @@ var videoUrl = "http://o8lfqzxlh.bkt.clouddn.com/1.mp4",
 
 
 var ab = new BulletPlayer("#mainBlock");
-ab.setVideo(asq,posterUrl,opt);
+ab.setVideo(videoUrl,posterUrl,opt);
 
 var danmuku = {
     position : "scroll",
