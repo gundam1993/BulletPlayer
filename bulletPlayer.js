@@ -507,7 +507,7 @@
             }
         });
 
-        danmukuShooter.addEventListener("click",this.addDanmuku.bind(this,_danmuku));
+        danmukuShooter.addEventListener("click",this.shootDanmuku.bind(this,_danmuku));
 
         this.setDanmukuStyle();
     };
@@ -536,29 +536,38 @@
         });      
     };
 
-    BulletPlayer.prototype.addDanmuku = function(danmuku) {
+    BulletPlayer.prototype.shootDanmuku = function(danmuku) {
         var video = document.querySelector("#BPlayer-video"),
-            danmukuInput = document.querySelector("#BPlayer-danmuku-input");
+            danmukuInput = document.querySelector("#BPlayer-danmuku-input"),
+            time = video.currentTime.toFixed(1) * 10,
+            timeref = ref.child(time);
+        if (danmukuInput.value !== "") {
             danmuku.content = danmukuInput.value;
             danmukuInput.value = "";
-        if (video.paused) {
-            video.addEventListener("play",function () {
-                if (danmuku.position == "scroll") {
-                    this.addDanmukuScroll(danmuku);
-                }else if (danmuku.position == "top") {
-                    this.addDanmukuTop(danmuku);
-                }else{
-                    this.addDanmukuBottom(danmuku); 
-                }   
-            }.bind(this,danmuku));
-        }else{
-            if (danmuku.position == "scroll") {
-                this.addDanmukuScroll(danmuku);
-            }else if (danmuku.position == "top") {
-                this.addDanmukuTop(danmuku);
+            if (video.paused) {
+                var switches=1;
+                video.addEventListener("play",function (danmuku) {
+                    if (switches === 1) {
+                        this.addDanmuku(danmuku);
+                        timeref = ref.child(time);
+                        timeref.push(danmuku);
+                        switches = 0;
+                    }
+                }.bind(this,danmuku));
             }else{
-                this.addDanmukuBottom(danmuku); 
+                this.addDanmuku(danmuku);
+                timeref.push(danmuku);
             }
+        }
+    };
+
+    BulletPlayer.prototype.addDanmuku = function(danmuku) {
+        if (danmuku.position == "scroll") {
+            this.addDanmukuScroll(danmuku);
+        }else if (danmuku.position == "top") {
+            this.addDanmukuTop(danmuku);
+        }else{
+            this.addDanmukuBottom(danmuku); 
         }
     };
 
@@ -583,11 +592,10 @@
             animations,
             count = 0;
 
-        danmuku.className = "BPlayer-danmuku-items BPlayer-danmuku-items-scroll";
         danmukuArea.appendChild(danmuku);
         width = danmuku.offsetWidth;
         danmuku.style.top = y + "px";
-        danmuku.style.left = - width + "px";
+        danmuku.style.left = x + "px";
 
         if (y < (danmukuArea.offsetHeight - height)) {
             danmukuOpt.scrollY += height;
@@ -596,14 +604,15 @@
         }
 
         function stepScroll() {
-            if (count < 300) {
-                count ++;
+            x -= step;
+            danmuku.style.left = x + "px";
+            if (x > -width) {
                 animations = requestAnimationFrame(stepScroll);
             }else{
-                if (y < danmukuOpt.topY) {
+                window.cancelAnimationFrame(animations);
+                if (y < danmukuOpt.scrollY) {
                     danmukuOpt.scrollY = y;
                 }
-                window.cancelAnimationFrame(animations);
                 danmuku.remove();
             }
         }
@@ -611,10 +620,12 @@
 
         video.addEventListener("pause",function () {
             window.cancelAnimationFrame(animations);
+            danmuku.className = "BPlayer-danmuku-items BPlayer-danmuku-items-scroll BPlayer-danmuku-items-paused"; 
         });
 
         video.addEventListener("play",function () {
             animations = requestAnimationFrame(stepScroll);
+            danmuku.className = "BPlayer-danmuku-items BPlayer-danmuku-items-scroll"; 
         });
     };
 
@@ -730,7 +741,7 @@
             danmukuInput = document.querySelector("#BPlayer-danmuku-input");
         danmukuInput.addEventListener("keypress", function () {
             if (event.keyCode === 13) {
-                this.addDanmuku(_danmuku);
+                this.shootDanmuku(_danmuku);
             }
         }.bind(this));
 

@@ -520,7 +520,7 @@
 #BPlayer-danmuku-opacity-chosen
 {
     height: 4px;
-    width: 50%;
+    width: 75%;
     position: absolute;
     top: 0;
     left: 0;
@@ -570,14 +570,9 @@
     font-weight: bold;
     text-align: center;
     height: 26px;
-    transition: all 5s linear;
     cursor: default;
     white-space: nowrap;
     font-weight: bolder;
     text-shadow: .5px .5px .5px rgba(0,0,0,.5);
 }
 
-.BPlayer-danmuku-items-scroll
-{
-    left: 100%;
-}
