@@ -545,23 +545,6 @@
     overflow: hidden;
 }
 
-#BPlayer-danmuku-canvas
-{
-    width: 100%;
-    height: 100%;
-}
-
-
-
-#BPlayer-danmuku-canvas-top,#BPlayer-danmuku-canvas-scroll,#BPlayer-danmuku-canvas-bottom
-{
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-}
-
 .BPlayer-danmuku-items
 {
     position: absolute;

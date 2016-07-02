@@ -550,21 +550,13 @@
                     if (switches === 1) {
                         this.addDanmuku(danmuku);
                         timeref = ref.child(time);
-                        timeref.push({
-                                        content : danmuku.content,
-                                        position : danmuku.position,
-                                        color : danmuku.color
-                                    });
+                        timeref.push(danmuku);
                         switches = 0;
                     }
                 }.bind(this,danmuku));
             }else{
                 this.addDanmuku(danmuku);
-                timeref.push({
-                    content : danmuku.content,
-                    position : danmuku.position,
-                    color : danmuku.color
-                });
+                timeref.push(danmuku);
             }
         }
     };
@@ -589,7 +581,7 @@
             opt.content = danmukuOpt.content;
             opt.color = danmukuOpt.color;
             opt.position = danmukuOpt.position;
-            opt.scrollY = _danmuku.scrollY;
+            opt.scrollY = danmukuOpt.scrollY;
         
         var danmuku = _preload(opt),
             x = danmukuArea.offsetWidth,
@@ -606,9 +598,9 @@
         danmuku.style.left = x + "px";
 
         if (y < (danmukuArea.offsetHeight - height)) {
-            _danmuku.scrollY += height;
+            danmukuOpt.scrollY += height;
         }else{
-            _danmuku.scrollY = 0;
+            danmukuOpt.scrollY = 0;
         }
 
         function stepScroll() {
@@ -618,8 +610,8 @@
                 animations = requestAnimationFrame(stepScroll);
             }else{
                 window.cancelAnimationFrame(animations);
-                if (y < _danmuku.scrollY) {
-                    _danmuku.scrollY = y;
+                if (y < danmukuOpt.scrollY) {
+                    danmukuOpt.scrollY = y;
                 }
                 danmuku.remove();
             }
@@ -645,7 +637,7 @@
             opt.content = danmukuOpt.content;
             opt.color = danmukuOpt.color;
             opt.position = danmukuOpt.position;
-            opt.topY = _danmuku.topY;
+            opt.topY = danmukuOpt.topY;
         
         var danmuku = _preload(opt),
             width,
@@ -662,9 +654,9 @@
         danmuku.style.top = y + "px";
 
         if (y < (danmukuArea.offsetHeight - height)) {
-            _danmuku.topY += height;
+            danmukuOpt.topY += height;
         }else{
-            _danmuku.topY = 0;
+            danmukuOpt.topY = 0;
         }
 
         function stepTop() {
@@ -672,8 +664,8 @@
                 count ++;
                 animations = requestAnimationFrame(stepTop);
             }else{
-                if (y < _danmuku.topY) {
-                    _danmuku.topY = y;
+                if (y < danmukuOpt.topY) {
+                    danmukuOpt.topY = y;
                 }
                 window.cancelAnimationFrame(animations);
                 danmuku.remove();
@@ -698,7 +690,7 @@
             opt.content = danmukuOpt.content;
             opt.color = danmukuOpt.color;
             opt.position = danmukuOpt.position;
-            opt.bottomY = _danmuku.bottomY;
+            opt.bottomY = danmukuOpt.bottomY;
         
         var danmuku = _preload(opt),
             width,
@@ -715,9 +707,9 @@
         danmuku.style.bottom = y + "px";
 
         if (y < (danmukuArea.offsetHeight - height)) {
-            _danmuku.bottomY += height;
+            danmukuOpt.bottomY += height;
         }else{
-            _danmuku.bottomY = 0;
+            danmukuOpt.bottomY = 0;
         }
 
         function stepBottom() {
@@ -725,8 +717,8 @@
                 count ++;
                 animations = requestAnimationFrame(stepBottom);
             }else{
-                if (y < _danmuku.bottomY) {
-                    _danmuku.bottomY = y;
+                if (y < danmukuOpt.bottomY) {
+                    danmukuOpt.bottomY = y;
                 }
                 window.cancelAnimationFrame(animations);
                 danmuku.remove();
