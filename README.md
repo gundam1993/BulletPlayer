@@ -36,7 +36,7 @@ obj.setVideo("", "",{
 |bulletState|是否启用弹幕|true<br />false|启用弹幕<br />禁止弹幕|true|
 
 5. 关于后端
-DEMO中使用了野狗®的晕后台来实现弹幕储存，后端接口暂时没有完成
+DEMO中使用了野狗®的云后台来实现弹幕储存，后端接口暂时没有完成
 
 ## Todo
 
