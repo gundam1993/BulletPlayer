@@ -147,8 +147,7 @@
     }
 
     function _secondToTime(second) {
-        var minute = parseInt(second / 60),
-        time = "";
+        var minute = parseInt(second / 60);
         second = parseInt(second - minute * 60);
         function add0(num) {
             if (num < 10) {
@@ -205,7 +204,6 @@
         }
 
         var video = document.createElement("VIDEO"),
-            videoArea = document.createElement("div"),
             danmukuArea = document.createElement("div"),
             player = document.createElement("div");
 
@@ -213,7 +211,7 @@
         video.id = "BPlayer-video";
         danmukuArea.id = "BPlayer-danmukuArea";
 
-        //video.poster = posterUrl;
+        video.poster = posterUrl;
         video.innerHTML = "<source src='" + videoUrl + "'>";
         video.style.height = this.container.offsetHeigh + "px";
 
@@ -232,8 +230,7 @@
             volumeControler = _buildVolumeControler(),
             playBar = _buildPlayBar(),
             danmukuBtn = document.createElement("div"),
-            player = document.querySelector("#BPlayer"),
-            video = document.querySelector("#BPlayer-video");
+            player = document.querySelector("#BPlayer");
 
         controler.id = "BPlayer-controler";
         playBtn.id = "BPlayer-playBtn";
@@ -457,8 +454,7 @@
             danmukuInput = document.createElement("input"),
             danmukuShooter = document.createElement("div"),
             danmukuStyleMenu = _buildDanmukuStyleMenu(),
-            bPlayer = document.querySelector("#BPlayer"),
-            video = document.querySelector("#BPlayer-video");
+            bPlayer = document.querySelector("#BPlayer");
 
         danmukuControler.id = "BPlayer-danmuku-controler";
         danmukuStyleBtn.id = "BPlayer-danmuku-style";
@@ -597,8 +593,7 @@
             width,
             height = danmuku.height,
             step = x / 300,
-            animations,
-            count = 0;
+            animations;
 
         danmukuArea.appendChild(danmuku);
         width = danmuku.offsetWidth;
@@ -744,9 +739,7 @@
     };
     
     BulletPlayer.prototype.keyBoardEvent = function() {
-        var video = document.querySelector("#BPlayer-video"),
-            BPlayer = document.querySelector("#BPlayer"),
-            danmukuInput = document.querySelector("#BPlayer-danmuku-input");
+        var danmukuInput = document.querySelector("#BPlayer-danmuku-input");
         danmukuInput.addEventListener("keypress", function () {
             if (event.keyCode === 13) {
                 this.shootDanmuku(_danmuku);

@@ -4,7 +4,9 @@
     'use strict';
 
 
-
+    /**
+     * 构造函数
+     */
     function BulletPlayer(id) {
         this.containerSelector = id;
         this.container = document.querySelector(this.containerSelector);
@@ -20,6 +22,9 @@
         volume : ""
     };
 
+    /**
+     * 临时储存当前弹幕的样式
+     */
     var _danmuku = {
         position : "scroll",
         color : "#FFF",
@@ -29,6 +34,9 @@
         bottomY : 0
     };
     
+    /**
+     * 启用全屏
+     */
     function _launchFullscreen(element) {
         if(element.requestFullscreen) {
             element.requestFullscreen();
@@ -40,6 +48,9 @@
             element.webkitRequestFullScreen();
         }}
 
+    /**
+     * 退出全屏
+     */
     function _exitFullscreen() {
         if (document.exitFullscreen) {
             document.exitFullscreen();
@@ -51,6 +62,9 @@
           document.webkitExitFullscreen();
         }}
 
+    /**
+     * 构筑音频控制条
+     */
     function _buildVolumeControler() {
         var volumeControler = document.createElement("div"),
             volumeBtn = document.createElement("div"),
@@ -75,6 +89,9 @@
         return volumeControler;
     }
 
+    /**
+     * 构筑播放进度控制条
+     */
     function _buildPlayBar() {
         var playBarContainer = document.createElement("div"),
             playBar = document.createElement("div"),
@@ -95,6 +112,9 @@
         return playBarContainer;
     }
 
+    /**
+     * 构筑弹幕样式控制面板
+     */
     function _buildDanmukuStyleMenu() {
         var danmukuStyleMenu = document.createElement("div"),
             danmukuColorMenu = document.createElement("div"),
@@ -146,9 +166,13 @@
         return danmukuStyleMenu;
     }
 
+    /**
+     * 将秒转化为mm:ss的样式
+     * @param  {int} second 秒数
+     * @return {str}        mm:ss格式的字符串
+     */
     function _secondToTime(second) {
-        var minute = parseInt(second / 60),
-        time = "";
+        var minute = parseInt(second / 60);
         second = parseInt(second - minute * 60);
         function add0(num) {
             if (num < 10) {
@@ -159,6 +183,9 @@
         return add0(minute) + ":" + add0(second);
     }
 
+    /**
+     * 播放状态改变时改变播放按钮图标
+     */
     function _playStateChange() {
         var btnMark = document.querySelector("#BPlayer-playMark"),
             video = document.querySelector("#BPlayer-video");
@@ -171,6 +198,9 @@
             }
     }
 
+    /**
+     * 预渲染弹幕元素
+     */
     function _preload(opt) {
         var danmukuItem = document.createElement('div');
         danmukuItem.className = "BPlayer-danmuku-items";
@@ -181,6 +211,12 @@
         return danmukuItem;
     }
     /************* 以下是本库提供的公有方法 *************/
+    /**
+     * 初始化，设置视频来源
+     * @param {str} videoUrl  视频地址
+     * @param {str} posterUrl 视频封面地址
+     * @param {obj} opt       初始参数
+     */
     BulletPlayer.prototype.setVideo = function(videoUrl,posterUrl,opt) {
         this.container.style.height = "";
 
@@ -199,13 +235,17 @@
         this.keyBoardEvent();
     };
     
+    /**
+     * 向目标元素中插入视频和弹幕层
+     * @param {str} videoUrl  视频地址
+     * @param {str} posterUrl 视频封面地址
+     */
     BulletPlayer.prototype.addVideo = function(videoUrl,posterUrl) {
         if (document.querySelector("#BPlayer")) {
             document.querySelector("#BPlayer").remove();
         }
 
         var video = document.createElement("VIDEO"),
-            videoArea = document.createElement("div"),
             danmukuArea = document.createElement("div"),
             player = document.createElement("div");
 
@@ -213,7 +253,7 @@
         video.id = "BPlayer-video";
         danmukuArea.id = "BPlayer-danmukuArea";
 
-        //video.poster = posterUrl;
+        video.poster = posterUrl;
         video.innerHTML = "<source src='" + videoUrl + "'>";
         video.style.height = this.container.offsetHeigh + "px";
 
@@ -223,6 +263,9 @@
 
     };
 
+    /**
+     * 构筑播放器控制条，并绑定相关事件
+     */
     BulletPlayer.prototype.addControler = function() {
         var controler = document.createElement("div"),
             playBtn = document.createElement("div"),
@@ -232,8 +275,7 @@
             volumeControler = _buildVolumeControler(),
             playBar = _buildPlayBar(),
             danmukuBtn = document.createElement("div"),
-            player = document.querySelector("#BPlayer"),
-            video = document.querySelector("#BPlayer-video");
+            player = document.querySelector("#BPlayer");
 
         controler.id = "BPlayer-controler";
         playBtn.id = "BPlayer-playBtn";
@@ -251,7 +293,7 @@
         loop.innerHTML = "<i class='iconfont icon-loop' id='BPlayer-loopMark'></i>";
         danmukuBtn.innerHTML = "<i class='iconfont icon-icon' id='BPlayer-loopMark'></i>";
         timer.innerHTML = "<span id='BPlayer-timer-played'>00:00</span>/<span id='BPlayer-timer-length'>00:00</span>";    
-
+        //全屏按钮按下时切换全屏状态
         fullscreenBtn.onclick = function () {
             var fullscreenElement = document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement;
             if (!fullscreenElement) {
@@ -260,7 +302,7 @@
                 _exitFullscreen();
             }
         };
-
+        //切换弹幕面板显示状态
         danmukuBtn.onclick = function () {
             var danmukuControler = document.querySelector("#BPlayer-danmuku-controler"),
                 danmukuStyleMenu = document.querySelector("#BPlayer-danmuku-styleMenu"),
@@ -289,6 +331,9 @@
         player.appendChild(controler);
     };
 
+    /**
+     * 初始化播放状态
+     */
     BulletPlayer.prototype.initPlayState = function() {
         var video = document.querySelector("#BPlayer-video"),
             playBtn = document.querySelector("#BPlayer-playBtn"),
@@ -359,23 +404,23 @@
                 document.removeEventListener('mousemove', playBarMove);
             });
         });
-
+        //隐藏控制条
         function controlerHide() {
             clearTimeout(timeout);
             controler.className = "BPlayer-controler-hide";
         }
-
+        //显示控制条
         function controlerShow() {
             clearTimeout(timeout);
             controler.className = "";
         }
-
+        //显示控制条，4秒后自动隐藏
         function controlerShowThenHide() {
             clearTimeout(timeout); 
             controlerShow();
             timeout = setTimeout(controlerHide,4000);
         }
-
+        //设置开始播放后的控制条状态
         video.addEventListener("playing", function () {
             setTimeout(controlerHide,4000);
 
@@ -383,12 +428,12 @@
 
             player.addEventListener("mouseout", controlerHide);
         });
-
+        //设置暂停播放后的控制条状态
         video.addEventListener("pause", function () {
             controlerShow();
             player.removeEventListener("mouseout", controlerHide);
         });
-
+        //设置循环播放状态
         loopBtn.addEventListener("click", function () {
             if (video.loop) {
                 video.loop = false;
@@ -400,6 +445,9 @@
         });
     };
 
+    /**
+     * 设置播放器音量
+     */
     BulletPlayer.prototype.initVolumeState = function() {
         var video = document.querySelector("#BPlayer-video"),
             controler = document.querySelector("#BPlayer-controler"),
@@ -451,14 +499,16 @@
         });
     };
 
+    /**
+     * 构筑弹幕输入条
+     */
     BulletPlayer.prototype.addDanmukuControler = function() {
         var danmukuControler = document.createElement("div"),
             danmukuStyleBtn = document.createElement("div"),
             danmukuInput = document.createElement("input"),
             danmukuShooter = document.createElement("div"),
             danmukuStyleMenu = _buildDanmukuStyleMenu(),
-            bPlayer = document.querySelector("#BPlayer"),
-            video = document.querySelector("#BPlayer-video");
+            bPlayer = document.querySelector("#BPlayer");
 
         danmukuControler.id = "BPlayer-danmuku-controler";
         danmukuStyleBtn.id = "BPlayer-danmuku-style";
@@ -512,6 +562,9 @@
         this.setDanmukuStyle();
     };
 
+    /**
+     * 设置当前弹幕样式
+     */
     BulletPlayer.prototype.setDanmukuStyle = function() {
         var danmukuPositionMenu = document.querySelector("#BPlayer-danmuku-PositionMenu"),
             danmukuColorMenu = document.querySelector("#BPlayer-danmuku-ColorMenu"),
@@ -536,11 +589,14 @@
         });      
     };
 
+    /**
+     * 输入弹幕并发射
+     * @param  {obj} opt 弹幕样式
+     * @return {obj}     弹幕样式
+     */
     BulletPlayer.prototype.shootDanmuku = function(danmuku) {
         var video = document.querySelector("#BPlayer-video"),
-            danmukuInput = document.querySelector("#BPlayer-danmuku-input"),
-            time = video.currentTime.toFixed(1) * 10,
-            timeref = ref.child(time);
+            danmukuInput = document.querySelector("#BPlayer-danmuku-input");
         if (danmukuInput.value !== "") {
             danmuku.content = danmukuInput.value;
             danmukuInput.value = "";
@@ -549,26 +605,29 @@
                 video.addEventListener("play",function (danmuku) {
                     if (switches === 1) {
                         this.addDanmuku(danmuku);
-                        timeref = ref.child(time);
-                        timeref.push({
+                        switches = 0;
+                        return {
                                         content : danmuku.content,
                                         position : danmuku.position,
                                         color : danmuku.color
-                                    });
-                        switches = 0;
+                                    };
                     }
                 }.bind(this,danmuku));
             }else{
                 this.addDanmuku(danmuku);
-                timeref.push({
+                return {
                     content : danmuku.content,
                     position : danmuku.position,
                     color : danmuku.color
-                });
+                };
             }
         }
     };
 
+    /**
+     * 插入弹幕，根据样式调用相应的函数
+     * @param {obj} danmukuOpt 弹幕样式
+     */
     BulletPlayer.prototype.addDanmuku = function(danmuku) {
         if (danmuku.position == "scroll") {
             this.addDanmukuScroll(danmuku);
@@ -579,7 +638,10 @@
         }
     };
 
-
+    /**
+     * 添加滚动弹幕
+     * @param {obj} danmukuOpt 弹幕样式
+     */
     BulletPlayer.prototype.addDanmukuScroll = function(danmukuOpt) {
         var danmukuArea = document.querySelector("#BPlayer-danmukuArea"),
             video = document.querySelector("#BPlayer-video"),
@@ -597,8 +659,7 @@
             width,
             height = danmuku.height,
             step = x / 300,
-            animations,
-            count = 0;
+            animations;
 
         danmukuArea.appendChild(danmuku);
         width = danmuku.offsetWidth;
@@ -637,6 +698,10 @@
         });
     };
 
+    /**
+     * 添加顶部弹幕
+     * @param {obj} danmukuOpt 弹幕样式
+     */
     BulletPlayer.prototype.addDanmukuTop = function(danmukuOpt) {
         var danmukuArea = document.querySelector("#BPlayer-danmukuArea"),
             video = document.querySelector("#BPlayer-video"),
@@ -690,6 +755,10 @@
         });
     };
 
+    /**
+     * 添加底部弹幕
+     * @param {obj} danmukuOpt 弹幕样式
+     */
     BulletPlayer.prototype.addDanmukuBottom = function(danmukuOpt) {
          var danmukuArea = document.querySelector("#BPlayer-danmukuArea"),
             video = document.querySelector("#BPlayer-video"),
@@ -743,10 +812,11 @@
         });
     };
     
+    /**
+     * 绑定键盘事件
+     */
     BulletPlayer.prototype.keyBoardEvent = function() {
-        var video = document.querySelector("#BPlayer-video"),
-            BPlayer = document.querySelector("#BPlayer"),
-            danmukuInput = document.querySelector("#BPlayer-danmuku-input");
+        var danmukuInput = document.querySelector("#BPlayer-danmuku-input");
         danmukuInput.addEventListener("keypress", function () {
             if (event.keyCode === 13) {
                 this.shootDanmuku(_danmuku);

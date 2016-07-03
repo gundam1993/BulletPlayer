@@ -8,6 +8,7 @@
     function BulletPlayer(id) {
         this.containerSelector = id;
         this.container = document.querySelector(this.containerSelector);
+        this.danmukuList = [];
     }
 
     // 私有变量和私有方法
@@ -20,14 +21,24 @@
         volume : ""
     };
 
+    function Danmuku(opt) {
+        this.position = opt.position ||"scroll";
+        this.color = opt.color || "#FFF";
+        this.content= opt.content || "";
+        this.cvs= _preload(opt);
+        this.timer = 0;
+    }
+
     var _danmuku = {
         position : "scroll",
         color : "#FFF",
-        content : "",
         scrollY : 0,
         topY : 0,
-        bottomY : 0
+        bottomY :0
     };
+
+    var _animations;
+
     
     function _launchFullscreen(element) {
         if(element.requestFullscreen) {
@@ -50,6 +61,14 @@
         } else if (document.webkitExitFullscreen) {
           document.webkitExitFullscreen();
         }}
+
+    function _refreshCanvasSize() {
+        var danmukuArea = document.querySelector("#BPlayer-danmukuArea");
+        setTimeout(function () {
+                danmukuArea.width = danmukuArea.offsetWidth;
+                danmukuArea.height = danmukuArea.offsetHeight;
+            },100);
+    }
 
     function _buildVolumeControler() {
         var volumeControler = document.createElement("div"),
@@ -147,8 +166,7 @@
     }
 
     function _secondToTime(second) {
-        var minute = parseInt(second / 60),
-        time = "";
+        var minute = parseInt(second / 60);
         second = parseInt(second - minute * 60);
         function add0(num) {
             if (num < 10) {
@@ -172,13 +190,49 @@
     }
 
     function _preload(opt) {
-        var danmukuItem = document.createElement('div');
-        danmukuItem.className = "BPlayer-danmuku-items";
-        danmukuItem.innerHTML = opt.content;
-        danmukuItem.style.color = opt.color;
-        danmukuItem.height = 26;
+        var cvs = document.createElement('canvas'),
+            ctx = cvs.getContext("2d");
 
-        return danmukuItem;
+        ctx.font="23px Arial bold";
+        cvs.width = ctx.measureText(opt.content).width;
+        cvs.height = 26;
+        ctx.textAlign = "start";
+        ctx.textBaseline = "top";
+        ctx.fillStyle = "#fff";
+        ctx.fillStyle = opt.color;
+        ctx.font="23px Arial bold";
+        ctx.fillText(opt.content, 0, 0);
+        return cvs;
+
+    }
+
+    function _setPositons(danmuku) {
+        var danmukuArea = document.querySelector("#BPlayer-danmukuArea");
+        if (danmuku.position === "scroll") {
+            danmuku.positionY = _danmuku.scrollY;
+            danmuku.positionX = danmukuArea.width;
+            if (_danmuku.scrollY < (danmukuArea.height - danmuku.cvs.height)) {
+                    _danmuku.scrollY += danmuku.cvs.height;
+            }else{
+                _danmuku.scrollY = 0;
+            }
+        }else if (danmuku.position === "top") {
+            danmuku.positionX = (danmukuArea.width - danmuku.cvs.width) / 2;
+            danmuku.positionY = _danmuku.topY;
+            if (_danmuku.topY < (danmukuArea.height - danmuku.cvs.height)) {
+                    _danmuku.topY += danmuku.cvs.height;
+            }else{
+                _danmuku.topY = 0;
+            }
+        }else{
+            danmuku.positionY = danmukuArea.height -  _danmuku.bottomY - danmuku.cvs.height;
+            danmuku.positionX = (danmukuArea.width - danmuku.cvs.width) / 2;
+            if (_danmuku.bottomY < (danmukuArea.height - 2 * danmuku.cvs.height)) {
+                    _danmuku.bottomY += danmuku.cvs.height;
+            }else{
+                _danmuku.bottomY = 0;
+            }
+        }
     }
     /************* 以下是本库提供的公有方法 *************/
     BulletPlayer.prototype.setVideo = function(videoUrl,posterUrl,opt) {
@@ -197,6 +251,7 @@
         this.initVolumeState();
         this.addDanmukuControler();
         this.keyBoardEvent();
+        this.danmukuControl();
     };
     
     BulletPlayer.prototype.addVideo = function(videoUrl,posterUrl) {
@@ -205,22 +260,26 @@
         }
 
         var video = document.createElement("VIDEO"),
-            videoArea = document.createElement("div"),
-            danmukuArea = document.createElement("div"),
             player = document.createElement("div");
 
         player.id = "BPlayer";
         video.id = "BPlayer-video";
-        danmukuArea.id = "BPlayer-danmukuArea";
+        var danmukuArea = "<canvas id='BPlayer-danmukuArea' style='opacity: 0.75;'></canvas>";
 
         //video.poster = posterUrl;
         video.innerHTML = "<source src='" + videoUrl + "'>";
         video.style.height = this.container.offsetHeigh + "px";
 
         player.appendChild(video);
-        player.appendChild(danmukuArea);
+        player.innerHTML += danmukuArea;
         this.container.appendChild(player);
 
+        danmukuArea = document.querySelector("#BPlayer-danmukuArea");
+
+        video.addEventListener("canplay",function () {
+            danmukuArea.width = danmukuArea.offsetWidth;
+            danmukuArea.height = video.videoHeight / video.videoWidth * danmukuArea.offsetWidth;
+        });
     };
 
     BulletPlayer.prototype.addControler = function() {
@@ -232,8 +291,7 @@
             volumeControler = _buildVolumeControler(),
             playBar = _buildPlayBar(),
             danmukuBtn = document.createElement("div"),
-            player = document.querySelector("#BPlayer"),
-            video = document.querySelector("#BPlayer-video");
+            player = document.querySelector("#BPlayer");
 
         controler.id = "BPlayer-controler";
         playBtn.id = "BPlayer-playBtn";
@@ -260,6 +318,11 @@
                 _exitFullscreen();
             }
         };
+
+        //全屏时刷新弹幕canvas大小
+        document.addEventListener("fullscreenchange", _refreshCanvasSize);
+        document.addEventListener("webkitfullscreenchange", _refreshCanvasSize);
+        document.addEventListener("mozfullscreenchange", _refreshCanvasSize);
 
         danmukuBtn.onclick = function () {
             var danmukuControler = document.querySelector("#BPlayer-danmuku-controler"),
@@ -300,14 +363,17 @@
             controler = document.querySelector("#BPlayer-controler"),
             loopBtn = document.querySelector("#BPlayer-loopBtn"),
             player = document.querySelector("#BPlayer"),
+            danmukuArea = document.querySelector("#BPlayer-danmukuArea"),
             timeout;
 
         /**
-         * 获取视频时长，添加到时间栏
+         * 获取视频时长，添加到时间栏,设置弹幕canvas大小
          */
         video.addEventListener("canplaythrough",function () {
             var timelength = document.querySelector("#BPlayer-timer-length");
             timelength.innerHTML = _secondToTime(video.duration);
+            danmukuArea.width = player.offsetWidth;
+            danmukuArea.height = player.offsetHeight;
         });
 
         /**
@@ -457,8 +523,8 @@
             danmukuInput = document.createElement("input"),
             danmukuShooter = document.createElement("div"),
             danmukuStyleMenu = _buildDanmukuStyleMenu(),
-            bPlayer = document.querySelector("#BPlayer"),
-            video = document.querySelector("#BPlayer-video");
+            player = document.querySelector("#BPlayer");
+
 
         danmukuControler.id = "BPlayer-danmuku-controler";
         danmukuStyleBtn.id = "BPlayer-danmuku-style";
@@ -476,14 +542,14 @@
         danmukuControler.appendChild(danmukuInput);
         danmukuControler.appendChild(danmukuShooter);
         danmukuControler.appendChild(danmukuStyleMenu);
-        bPlayer.appendChild(danmukuControler);
+        player.appendChild(danmukuControler);
 
         var danmukuOpacityChosen = document.querySelector("#BPlayer-danmuku-opacity-chosen"),
             danmukuOpacity = document.querySelector("#BPlayer-danmuku-opacity"),
             danmukuOpacityThumb = document.querySelector("#BPlayer-danmuku-opacity-thumb");
 
         function opacityMove() {
-            var positionX = event.clientX - 300- bPlayer.offsetLeft;
+            var positionX = event.clientX - 300- player.offsetLeft;
             if (positionX > danmukuOpacity.offsetWidth) {
                 positionX = danmukuOpacity.offsetWidth;
             }
@@ -536,209 +602,83 @@
         });      
     };
 
-    BulletPlayer.prototype.shootDanmuku = function(danmuku) {
+    BulletPlayer.prototype.shootDanmuku = function(opt) {
         var video = document.querySelector("#BPlayer-video"),
+            canvas = document.querySelector("#BPlayer-danmukuArea"),
             danmukuInput = document.querySelector("#BPlayer-danmuku-input"),
             time = video.currentTime.toFixed(1) * 10,
             timeref = ref.child(time);
         if (danmukuInput.value !== "") {
-            danmuku.content = danmukuInput.value;
+            opt.content = danmukuInput.value;
+            var danmuku = new Danmuku(opt);
             danmukuInput.value = "";
-            if (video.paused) {
-                var switches=1;
-                video.addEventListener("play",function (danmuku) {
-                    if (switches === 1) {
-                        this.addDanmuku(danmuku);
-                        timeref = ref.child(time);
-                        timeref.push(danmuku);
-                        switches = 0;
+            _setPositons(danmuku);
+            danmuku.speed = (canvas.width + danmuku.cvs.width) / 420;
+            danmuku.timer = 0;
+            this.danmukuList.push(danmuku);
+            timeref.push({
+                content : opt.content,
+                position : opt.position,
+                color : opt.color
+            });
+        }
+    };
+
+    BulletPlayer.prototype.loadDanmuku = function(opt) {
+        var canvas = document.querySelector("#BPlayer-danmukuArea");
+            var danmuku = new Danmuku(opt);
+            _setPositons(danmuku);
+            danmuku.speed = (canvas.width + danmuku.cvs.width) / 420;
+            danmuku.timer = 0;
+            this.danmukuList.push(danmuku);
+    };
+
+    BulletPlayer.prototype.drawDanmuku = function() {
+        var canvas = document.querySelector("#BPlayer-danmukuArea"),
+            ctx = canvas.getContext("2d");
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+        for (var i = 0; i < this.danmukuList.length; i++) {
+            ctx.drawImage(this.danmukuList[i].cvs,this.danmukuList[i].positionX,this.danmukuList[i].positionY,this.danmukuList[i].cvs.width,this.danmukuList[i].cvs.height);
+            this.danmukuList[i].timer++;
+            if (this.danmukuList[i].position === "scroll") {
+                this.danmukuList[i].positionX-=this.danmukuList[i].speed;
+            }
+            
+            if (this.danmukuList[i].timer > 420) {
+                if (this.danmukuList[i].position === "scroll") {
+                    if (_danmuku.scrollY > this.danmukuList[i].positionY) {
+                        _danmuku.scrollY = this.danmukuList[i].positionY;
                     }
-                }.bind(this,danmuku));
-            }else{
-                this.addDanmuku(danmuku);
-                timeref.push(danmuku);
-            }
-        }
-    };
-
-    BulletPlayer.prototype.addDanmuku = function(danmuku) {
-        if (danmuku.position == "scroll") {
-            this.addDanmukuScroll(danmuku);
-        }else if (danmuku.position == "top") {
-            this.addDanmukuTop(danmuku);
-        }else{
-            this.addDanmukuBottom(danmuku); 
-        }
-    };
-
-
-    BulletPlayer.prototype.addDanmukuScroll = function(danmukuOpt) {
-        var danmukuArea = document.querySelector("#BPlayer-danmukuArea"),
-            video = document.querySelector("#BPlayer-video"),
-            opt = {};
-
-
-            opt.content = danmukuOpt.content;
-            opt.color = danmukuOpt.color;
-            opt.position = danmukuOpt.position;
-            opt.scrollY = danmukuOpt.scrollY;
-        
-        var danmuku = _preload(opt),
-            x = danmukuArea.offsetWidth,
-            y = opt.scrollY,
-            width,
-            height = danmuku.height,
-            step = x / 300,
-            animations,
-            count = 0;
-
-        danmukuArea.appendChild(danmuku);
-        width = danmuku.offsetWidth;
-        danmuku.style.top = y + "px";
-        danmuku.style.left = x + "px";
-
-        if (y < (danmukuArea.offsetHeight - height)) {
-            danmukuOpt.scrollY += height;
-        }else{
-            danmukuOpt.scrollY = 0;
-        }
-
-        function stepScroll() {
-            x -= step;
-            danmuku.style.left = x + "px";
-            if (x > -width) {
-                animations = requestAnimationFrame(stepScroll);
-            }else{
-                window.cancelAnimationFrame(animations);
-                if (y < danmukuOpt.scrollY) {
-                    danmukuOpt.scrollY = y;
+                }else if (this.danmukuList[i].position === "top") {
+                    if (_danmuku.topY > this.danmukuList[i].positionY) {
+                        _danmuku.topY = this.danmukuList[i].positionY;
+                    }
+                }else{
+                    if (_danmuku.bottomY > this.danmukuList[i].positionY) {
+                        _danmuku.bottomY = this.danmukuList[i].positionY;
+                    }
                 }
-                danmuku.remove();
+                this.danmukuList.splice(i,1);
+                i--;
             }
         }
-        animations = requestAnimationFrame(stepScroll);
 
-        video.addEventListener("pause",function () {
-            window.cancelAnimationFrame(animations);
-            danmuku.className = "BPlayer-danmuku-items BPlayer-danmuku-items-scroll BPlayer-danmuku-items-paused"; 
-        });
-
-        video.addEventListener("play",function () {
-            animations = requestAnimationFrame(stepScroll);
-            danmuku.className = "BPlayer-danmuku-items BPlayer-danmuku-items-scroll"; 
-        });
-    };
-
-    BulletPlayer.prototype.addDanmukuTop = function(danmukuOpt) {
-        var danmukuArea = document.querySelector("#BPlayer-danmukuArea"),
-            video = document.querySelector("#BPlayer-video"),
-            opt = {};
-
-            opt.content = danmukuOpt.content;
-            opt.color = danmukuOpt.color;
-            opt.position = danmukuOpt.position;
-            opt.topY = danmukuOpt.topY;
-        
-        var danmuku = _preload(opt),
-            width,
-            height = danmuku.height,
-            x,
-            y = opt.topY,
-            animations,
-            count = 0;
-
-        danmukuArea.appendChild(danmuku);
-        width = danmuku.offsetWidth;
-        x = (danmukuArea.offsetWidth - width) / 2;
-        danmuku.style.left = x + "px";
-        danmuku.style.top = y + "px";
-
-        if (y < (danmukuArea.offsetHeight - height)) {
-            danmukuOpt.topY += height;
-        }else{
-            danmukuOpt.topY = 0;
-        }
-
-        function stepTop() {
-            if (count < 300) {
-                count ++;
-                animations = requestAnimationFrame(stepTop);
-            }else{
-                if (y < danmukuOpt.topY) {
-                    danmukuOpt.topY = y;
-                }
-                window.cancelAnimationFrame(animations);
-                danmuku.remove();
-            }
-        }
-        animations = requestAnimationFrame(stepTop);
-
-        video.addEventListener("pause",function () {
-            window.cancelAnimationFrame(animations);
-        });
-
-        video.addEventListener("play",function () {
-            animations = requestAnimationFrame(stepTop);
-        });
-    };
-
-    BulletPlayer.prototype.addDanmukuBottom = function(danmukuOpt) {
-         var danmukuArea = document.querySelector("#BPlayer-danmukuArea"),
-            video = document.querySelector("#BPlayer-video"),
-            opt = {};
-
-            opt.content = danmukuOpt.content;
-            opt.color = danmukuOpt.color;
-            opt.position = danmukuOpt.position;
-            opt.bottomY = danmukuOpt.bottomY;
-        
-        var danmuku = _preload(opt),
-            width,
-            height = danmuku.height,
-            x,
-            y = opt.bottomY,
-            animations,
-            count = 0;
-
-        danmukuArea.appendChild(danmuku);
-        width = danmuku.offsetWidth;
-        x = (danmukuArea.offsetWidth - width) / 2;
-        danmuku.style.left = x + "px";
-        danmuku.style.bottom = y + "px";
-
-        if (y < (danmukuArea.offsetHeight - height)) {
-            danmukuOpt.bottomY += height;
-        }else{
-            danmukuOpt.bottomY = 0;
-        }
-
-        function stepBottom() {
-            if (count < 300) {
-                count ++;
-                animations = requestAnimationFrame(stepBottom);
-            }else{
-                if (y < danmukuOpt.bottomY) {
-                    danmukuOpt.bottomY = y;
-                }
-                window.cancelAnimationFrame(animations);
-                danmuku.remove();
-            }
-        }
-        animations = requestAnimationFrame(stepBottom);
-
-        video.addEventListener("pause",function () {
-            window.cancelAnimationFrame(animations);
-        });
-
-        video.addEventListener("play",function () {
-            animations = requestAnimationFrame(stepTop);
-        });
+        _animations = requestAnimationFrame(this.drawDanmuku.bind(this));
     };
     
+    BulletPlayer.prototype.danmukuControl = function() {
+        var video = document.querySelector("#BPlayer-video");
+        video.addEventListener("pause",function () {
+            window.cancelAnimationFrame(_animations);
+        });
+
+        video.addEventListener("play",function () {
+            _animations = requestAnimationFrame(this.drawDanmuku.bind(this));
+        }.bind(this));
+    };
+
     BulletPlayer.prototype.keyBoardEvent = function() {
-        var video = document.querySelector("#BPlayer-video"),
-            BPlayer = document.querySelector("#BPlayer"),
-            danmukuInput = document.querySelector("#BPlayer-danmuku-input");
+        var danmukuInput = document.querySelector("#BPlayer-danmuku-input");
         danmukuInput.addEventListener("keypress", function () {
             if (event.keyCode === 13) {
                 this.shootDanmuku(_danmuku);

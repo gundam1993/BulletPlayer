@@ -4,7 +4,9 @@
     'use strict';
 
 
-
+    /**
+     * 构造函数
+     */
     function BulletPlayer(id) {
         this.containerSelector = id;
         this.container = document.querySelector(this.containerSelector);
@@ -21,6 +23,9 @@
         volume : ""
     };
 
+    /**
+     * 构造弹幕对象
+     */
     function Danmuku(opt) {
         this.position = opt.position ||"scroll";
         this.color = opt.color || "#FFF";
@@ -29,6 +34,9 @@
         this.timer = 0;
     }
 
+    /**
+     * 临时储存当前弹幕的样式
+     */
     var _danmuku = {
         position : "scroll",
         color : "#FFF",
@@ -39,9 +47,9 @@
 
     var _animations;
 
-    var fullscreenElement = document.fullscreenElement || document.mozFullscreenElement || document.webkitFullscreenElement; 
-
-    
+    /**
+     * 启用全屏
+     */
     function _launchFullscreen(element) {
         if(element.requestFullscreen) {
             element.requestFullscreen();
@@ -53,6 +61,9 @@
             element.webkitRequestFullScreen();
         }}
 
+    /**
+     * 退出全屏
+     */
     function _exitFullscreen() {
         if (document.exitFullscreen) {
             document.exitFullscreen();
@@ -64,6 +75,9 @@
           document.webkitExitFullscreen();
         }}
 
+    /**
+     *更新弹幕canvas尺寸
+     */
     function _refreshCanvasSize() {
         var danmukuArea = document.querySelector("#BPlayer-danmukuArea");
         setTimeout(function () {
@@ -72,6 +86,9 @@
             },100);
     }
 
+    /**
+     * 构筑音频控制条
+     */
     function _buildVolumeControler() {
         var volumeControler = document.createElement("div"),
             volumeBtn = document.createElement("div"),
@@ -96,6 +113,9 @@
         return volumeControler;
     }
 
+    /**
+     * 构筑播放进度控制条
+     */
     function _buildPlayBar() {
         var playBarContainer = document.createElement("div"),
             playBar = document.createElement("div"),
@@ -116,6 +136,9 @@
         return playBarContainer;
     }
 
+    /**
+     * 构筑弹幕样式控制面板
+     */
     function _buildDanmukuStyleMenu() {
         var danmukuStyleMenu = document.createElement("div"),
             danmukuColorMenu = document.createElement("div"),
@@ -167,9 +190,13 @@
         return danmukuStyleMenu;
     }
 
+    /**
+     * 将秒转化为mm:ss的样式
+     * @param  {int} second 秒数
+     * @return {str}        mm:ss格式的字符串
+     */
     function _secondToTime(second) {
-        var minute = parseInt(second / 60),
-        time = "";
+        var minute = parseInt(second / 60);
         second = parseInt(second - minute * 60);
         function add0(num) {
             if (num < 10) {
@@ -180,6 +207,9 @@
         return add0(minute) + ":" + add0(second);
     }
 
+    /**
+     * 播放状态改变时改变播放按钮图标
+     */
     function _playStateChange() {
         var btnMark = document.querySelector("#BPlayer-playMark"),
             video = document.querySelector("#BPlayer-video");
@@ -192,23 +222,29 @@
             }
     }
 
+    /**
+     * 预渲染弹幕
+     */
     function _preload(opt) {
         var cvs = document.createElement('canvas'),
             ctx = cvs.getContext("2d");
 
-        ctx.font="25px Arial bold";
+        ctx.font="23px Arial bold";
         cvs.width = ctx.measureText(opt.content).width;
         cvs.height = 26;
         ctx.textAlign = "start";
         ctx.textBaseline = "top";
         ctx.fillStyle = "#fff";
         ctx.fillStyle = opt.color;
-        ctx.font="25px Arial bold";
+        ctx.font="23px Arial bold";
         ctx.fillText(opt.content, 0, 0);
         return cvs;
 
     }
 
+    /**
+     * 设置弹幕初始位置
+     */
     function _setPositons(danmuku) {
         var danmukuArea = document.querySelector("#BPlayer-danmukuArea");
         if (danmuku.position === "scroll") {
@@ -238,6 +274,12 @@
         }
     }
     /************* 以下是本库提供的公有方法 *************/
+    /**
+     * 初始化，设置视频来源
+     * @param {str} videoUrl  视频地址
+     * @param {str} posterUrl 视频封面地址
+     * @param {obj} opt       初始参数
+     */
     BulletPlayer.prototype.setVideo = function(videoUrl,posterUrl,opt) {
         this.container.style.height = "";
 
@@ -257,20 +299,24 @@
         this.danmukuControl();
     };
     
+    /**
+     * 向目标元素中插入视频和弹幕层
+     * @param {str} videoUrl  视频地址
+     * @param {str} posterUrl 视频封面地址
+     */
     BulletPlayer.prototype.addVideo = function(videoUrl,posterUrl) {
         if (document.querySelector("#BPlayer")) {
             document.querySelector("#BPlayer").remove();
         }
 
         var video = document.createElement("VIDEO"),
-            videoArea = document.createElement("div"),
             player = document.createElement("div");
 
         player.id = "BPlayer";
         video.id = "BPlayer-video";
         var danmukuArea = "<canvas id='BPlayer-danmukuArea' style='opacity: 0.75;'></canvas>";
 
-        //video.poster = posterUrl;
+        video.poster = posterUrl;
         video.innerHTML = "<source src='" + videoUrl + "'>";
         video.style.height = this.container.offsetHeigh + "px";
 
@@ -286,6 +332,9 @@
         });
     };
 
+    /**
+     * 构筑播放器控制条，并绑定相关事件
+     */
     BulletPlayer.prototype.addControler = function() {
         var controler = document.createElement("div"),
             playBtn = document.createElement("div"),
@@ -295,8 +344,7 @@
             volumeControler = _buildVolumeControler(),
             playBar = _buildPlayBar(),
             danmukuBtn = document.createElement("div"),
-            player = document.querySelector("#BPlayer"),
-            video = document.querySelector("#BPlayer-video");
+            player = document.querySelector("#BPlayer");
 
         controler.id = "BPlayer-controler";
         playBtn.id = "BPlayer-playBtn";
@@ -314,7 +362,7 @@
         loop.innerHTML = "<i class='iconfont icon-loop' id='BPlayer-loopMark'></i>";
         danmukuBtn.innerHTML = "<i class='iconfont icon-icon' id='BPlayer-loopMark'></i>";
         timer.innerHTML = "<span id='BPlayer-timer-played'>00:00</span>/<span id='BPlayer-timer-length'>00:00</span>";    
-
+        //全屏按钮按下时切换全屏状态
         fullscreenBtn.onclick = function () {
             var fullscreenElement = document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement;
             if (!fullscreenElement) {
@@ -328,7 +376,7 @@
         document.addEventListener("fullscreenchange", _refreshCanvasSize);
         document.addEventListener("webkitfullscreenchange", _refreshCanvasSize);
         document.addEventListener("mozfullscreenchange", _refreshCanvasSize);
-
+        //切换弹幕面板显示状态
         danmukuBtn.onclick = function () {
             var danmukuControler = document.querySelector("#BPlayer-danmuku-controler"),
                 danmukuStyleMenu = document.querySelector("#BPlayer-danmuku-styleMenu"),
@@ -357,6 +405,9 @@
         player.appendChild(controler);
     };
 
+    /**
+     * 初始化播放状态
+     */
     BulletPlayer.prototype.initPlayState = function() {
         var video = document.querySelector("#BPlayer-video"),
             playBtn = document.querySelector("#BPlayer-playBtn"),
@@ -430,23 +481,23 @@
                 document.removeEventListener('mousemove', playBarMove);
             });
         });
-
+        //隐藏控制条
         function controlerHide() {
             clearTimeout(timeout);
             controler.className = "BPlayer-controler-hide";
         }
-
+        //显示控制条
         function controlerShow() {
             clearTimeout(timeout);
             controler.className = "";
         }
-
+        //显示控制条，4秒后自动隐藏
         function controlerShowThenHide() {
             clearTimeout(timeout); 
             controlerShow();
             timeout = setTimeout(controlerHide,4000);
         }
-
+        //设置开始播放后的控制条状态
         video.addEventListener("playing", function () {
             setTimeout(controlerHide,4000);
 
@@ -454,12 +505,12 @@
 
             player.addEventListener("mouseout", controlerHide);
         });
-
+        //设置暂停播放后的控制条状态
         video.addEventListener("pause", function () {
             controlerShow();
             player.removeEventListener("mouseout", controlerHide);
         });
-
+        //设置循环播放状态
         loopBtn.addEventListener("click", function () {
             if (video.loop) {
                 video.loop = false;
@@ -471,6 +522,9 @@
         });
     };
 
+    /**
+     * 设置播放器音量
+     */
     BulletPlayer.prototype.initVolumeState = function() {
         var video = document.querySelector("#BPlayer-video"),
             controler = document.querySelector("#BPlayer-controler"),
@@ -522,15 +576,16 @@
         });
     };
 
+    /**
+     * 构筑弹幕输入条
+     */
     BulletPlayer.prototype.addDanmukuControler = function() {
         var danmukuControler = document.createElement("div"),
             danmukuStyleBtn = document.createElement("div"),
             danmukuInput = document.createElement("input"),
             danmukuShooter = document.createElement("div"),
             danmukuStyleMenu = _buildDanmukuStyleMenu(),
-            player = document.querySelector("#BPlayer"),
-            video = document.querySelector("#BPlayer-video"),
-            danmukuArea = document.querySelector("#BPlayer-danmukuArea");
+            player = document.querySelector("#BPlayer");
 
 
         danmukuControler.id = "BPlayer-danmuku-controler";
@@ -585,6 +640,9 @@
         this.setDanmukuStyle();
     };
 
+    /**
+     * 设置当前弹幕样式
+     */
     BulletPlayer.prototype.setDanmukuStyle = function() {
         var danmukuPositionMenu = document.querySelector("#BPlayer-danmuku-PositionMenu"),
             danmukuColorMenu = document.querySelector("#BPlayer-danmuku-ColorMenu"),
@@ -609,46 +667,49 @@
         });      
     };
 
+    /**
+     * 添加弹幕
+     * @param  {obj} opt 弹幕样式
+     * @return {obj}     弹幕样式
+     */
     BulletPlayer.prototype.shootDanmuku = function(opt) {
-        var video = document.querySelector("#BPlayer-video"),
-            canvas = document.querySelector("#BPlayer-danmukuArea"),
-            danmukuInput = document.querySelector("#BPlayer-danmuku-input"),
-            time = video.currentTime.toFixed(1) * 10,
-            timeref = ref.child(time);
+        var canvas = document.querySelector("#BPlayer-danmukuArea"),
+            danmukuInput = document.querySelector("#BPlayer-danmuku-input");
         if (danmukuInput.value !== "") {
             opt.content = danmukuInput.value;
             var danmuku = new Danmuku(opt);
             danmukuInput.value = "";
             _setPositons(danmuku);
-            danmuku.speed = (canvas.width + danmuku.cvs.width) / 300;
+            danmuku.speed = (canvas.width + danmuku.cvs.width) / 420;
             danmuku.timer = 0;
             this.danmukuList.push(danmuku);
-            console.log({
+            return {
                 content : opt.content,
                 position : opt.position,
                 color : opt.color
-            });
-            timeref.push({
-                content : opt.content,
-                position : opt.position,
-                color : opt.color
-            });
+            };
         }
     };
 
+    /**
+     * 读取后端提供的弹幕数据并插入
+     * @param  {obj} opt 弹幕样式
+     */
     BulletPlayer.prototype.loadDanmuku = function(opt) {
         var canvas = document.querySelector("#BPlayer-danmukuArea");
             var danmuku = new Danmuku(opt);
             _setPositons(danmuku);
-            danmuku.speed = (canvas.width + danmuku.cvs.width) / 300;
+            danmuku.speed = (canvas.width + danmuku.cvs.width) / 420;
             danmuku.timer = 0;
             this.danmukuList.push(danmuku);
     };
 
+    /**
+     * 绘制弹幕
+     */
     BulletPlayer.prototype.drawDanmuku = function() {
         var canvas = document.querySelector("#BPlayer-danmukuArea"),
-            ctx = canvas.getContext("2d"),
-            width = canvas.width;
+            ctx = canvas.getContext("2d");
             ctx.clearRect(0,0,canvas.width,canvas.height);
         for (var i = 0; i < this.danmukuList.length; i++) {
             ctx.drawImage(this.danmukuList[i].cvs,this.danmukuList[i].positionX,this.danmukuList[i].positionY,this.danmukuList[i].cvs.width,this.danmukuList[i].cvs.height);
@@ -657,7 +718,7 @@
                 this.danmukuList[i].positionX-=this.danmukuList[i].speed;
             }
             
-            if (this.danmukuList[i].timer > 300) {
+            if (this.danmukuList[i].timer > 420) {
                 if (this.danmukuList[i].position === "scroll") {
                     if (_danmuku.scrollY > this.danmukuList[i].positionY) {
                         _danmuku.scrollY = this.danmukuList[i].positionY;
@@ -678,7 +739,10 @@
 
         _animations = requestAnimationFrame(this.drawDanmuku.bind(this));
     };
-    
+
+    /**
+     * 暂停时停止弹幕移动
+     */
     BulletPlayer.prototype.danmukuControl = function() {
         var video = document.querySelector("#BPlayer-video");
         video.addEventListener("pause",function () {
@@ -690,10 +754,11 @@
         }.bind(this));
     };
 
+    /**
+     * 绑定键盘事件
+     */
     BulletPlayer.prototype.keyBoardEvent = function() {
-        var video = document.querySelector("#BPlayer-video"),
-            BPlayer = document.querySelector("#BPlayer"),
-            danmukuInput = document.querySelector("#BPlayer-danmuku-input");
+        var danmukuInput = document.querySelector("#BPlayer-danmuku-input");
         danmukuInput.addEventListener("keypress", function () {
             if (event.keyCode === 13) {
                 this.shootDanmuku(_danmuku);
@@ -702,10 +767,7 @@
 
         document.addEventListener("keydown",function () {
             var video = document.querySelector("#BPlayer-video"),
-                volumeBarInner = document.querySelector("#BPlayer-volumeBar-inner"),
-                danmukuArea = document.querySelector("#BPlayer-danmukuArea"),
-                player = document.querySelector("#BPlayer");
-                console.log(event.keyCode);
+                volumeBarInner = document.querySelector("#BPlayer-volumeBar-inner");
             switch (event.keyCode) {
                 case 9 :
                     event.preventDefault();
