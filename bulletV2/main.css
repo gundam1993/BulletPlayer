@@ -1,0 +1,35 @@
+html,body
+{
+    margin: 0;
+    background-color: #EEE;
+    font-family: Helvetica,Tahoma,Arial,STXihei,\\534E\6587\7EC6\9ED1,Microsoft YaHei,\\5FAE\8F6F\96C5\9ED1,SimSun,\\5B8B\4F53,Heiti,\\9ED1\4F53,sans-serif;
+    text-align: center;
+}
+
+#mainBlock
+{
+    width: 1000px;
+    background-color: transparent;
+    margin: 50px auto 0 auto;
+}
+
+h1
+{
+    text-align: center;
+}
+
+h2,h3
+{
+    color: #777;
+    text-align: center;
+}
+
+p
+{
+
+}
+
+a
+{
+    text-decoration: none;
+}

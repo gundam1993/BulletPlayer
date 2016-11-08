@@ -21,6 +21,8 @@
         volume : ""
     };
 
+    var _shoot;
+
     function Danmuku(opt) {
         this.position = opt.position ||"scroll";
         this.color = opt.color || "#FFF";
@@ -83,9 +85,9 @@
         volumeBtn.className  = "BPlayer-Btn";
 
         volumeBtn.innerHTML = "<i class='iconfont icon-volumeup' id='BPlayer-volumeMark'></i>";
-        volumeBar.innerHTML = "<div id='BPlayer-volumeBar-inner'>\
-                                    <span id='BPlayer-volume-thumb' class='BPlayer-thumb'></span>\
-                                <div>";
+        volumeBar.innerHTML = `<div id='BPlayer-volumeBar-inner'>
+                                    <span id='BPlayer-volume-thumb' class='BPlayer-thumb'></span>
+                                <div>`;
         
         volumeBarContainer.appendChild(volumeBar);
         volumeControler.appendChild(volumeBtn);
@@ -127,37 +129,37 @@
         danmukuPositionMenu.id = "BPlayer-danmuku-PositionMenu";
         danmukuOpacityMenu.id = "BPlayer-danmuku-OpacityMenu";
 
-        danmukuPositionMenu.innerHTML = "<span>弹幕模式</span>\
-                                        <label>\
-                                            <input type='radio' value='top' name='BPlayer-danmuku-Position' class='hidden-input BPlayer-danmuku-Position' />\
-                                            <span>顶端</span>\
-                                        </label>\
-                                        <label>\
-                                            <input type='radio' value='scroll' name='BPlayer-danmuku-Position' checked class='hidden-input BPlayer-danmuku-Position' />\
-                                            <span>滚动</span>\
-                                        </label>\
-                                        <label>\
-                                            <input type='radio' value='bottom' name='BPlayer-danmuku-Position' class='hidden-input BPlayer-danmuku-Position' />\
-                                            <span>底端</span>\
-                                        </label>";
+        danmukuPositionMenu.innerHTML = `<span>弹幕模式</span>
+                                        <label>
+                                            <input type='radio' value='top' name='BPlayer-danmuku-Position' class='hidden-input BPlayer-danmuku-Position' />
+                                            <span>顶端</span>
+                                        </label>
+                                        <label>
+                                            <input type='radio' value='scroll' name='BPlayer-danmuku-Position' checked class='hidden-input BPlayer-danmuku-Position' />
+                                            <span>滚动</span>
+                                        </label>
+                                        <label>
+                                            <input type='radio' value='bottom' name='BPlayer-danmuku-Position' class='hidden-input BPlayer-danmuku-Position' />
+                                            <span>底端</span>
+                                        </label>`;
         danmukuColorMenu.innerHTML = "<span>弹幕颜色</span>";
-        danmukuColorMenu.innerHTML +=  "<label>\
-                                                <input type='radio' value=" + colors[0] + " name='BPlayer-danmuku-Color' class='hidden-input BPlayer-danmuku-Color' checked/>\
-                                                <span style='background-color:" + colors[0] + "' ></span>\
-                                            </label>";
+        danmukuColorMenu.innerHTML +=  `<label>
+                                                <input type='radio' value=${colors[0]} name='BPlayer-danmuku-Color' class='hidden-input BPlayer-danmuku-Color' checked/>
+                                                <span style='background-color:${colors[0]}' ></span>
+                                            </label>`;
         for (var i = 0,len=colors.length-1; i < len; i++) {
-            danmukuColorMenu.innerHTML +=  "<label>\
-                                                <input type='radio' value=" + colors[i + 1] + " name='BPlayer-danmuku-Color' class='hidden-input BPlayer-danmuku-Color'/>\
-                                                <span style='background-color:" + colors[i + 1] + "' ></span>\
-                                            </label>";
+            danmukuColorMenu.innerHTML +=  `<label>
+                                                <input type='radio' value=${colors[i + 1]} name='BPlayer-danmuku-Color' class='hidden-input BPlayer-danmuku-Color'/>
+                                                <span style='background-color:${colors[i + 1]}' ></span>
+                                            </label>`;
         }
 
-        danmukuOpacityMenu.innerHTML = "<span>弹幕透明度</span>\
-                                        <div id='BPlayer-danmuku-opacity'>\
-                                            <div id='BPlayer-danmuku-opacity-chosen'>\
-                                                <span id='BPlayer-danmuku-opacity-thumb' class='BPlayer-thumb'></span>\
-                                            </div>\
-                                        </div>";
+        danmukuOpacityMenu.innerHTML = `<span>弹幕透明度</span>
+                                        <div id='BPlayer-danmuku-opacity'>
+                                            <div id='BPlayer-danmuku-opacity-chosen'>
+                                                <span id='BPlayer-danmuku-opacity-thumb' class='BPlayer-thumb'></span>
+                                            </div>
+                                        </div>`;
 
         danmukuStyleMenu.appendChild(danmukuPositionMenu);
         danmukuStyleMenu.appendChild(danmukuColorMenu);
@@ -234,6 +236,7 @@
             }
         }
     }
+
     /************* 以下是本库提供的公有方法 *************/
     BulletPlayer.prototype.setVideo = function(videoUrl,posterUrl,opt) {
         this.container.style.height = "";
@@ -621,6 +624,12 @@
                 position : opt.position,
                 color : opt.color
             });
+            _shoot= new CustomEvent('shoots', {detail:{
+                    content : opt.content,
+                    position : opt.position,
+                    color : opt.color
+            }});
+            window.dispatchEvent(_shoot);
         }
     };
 
@@ -713,6 +722,10 @@
 
         });
     };
+
+    window.addEventListener("shoots",function (e) {
+        console.log(e.detail);
+    })
 
 
 
