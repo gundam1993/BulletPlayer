@@ -725,7 +725,7 @@
 
     window.addEventListener("shoots",function (e) {
         console.log(e.detail);
-    })
+    });
 
 
 

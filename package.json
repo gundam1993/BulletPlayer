@@ -1,10 +1,12 @@
 {
   "name": "bullet-player",
   "version": "1.0.0",
-  "description": "A HTML5 danmaku video player",
-  "main": "bulletPlayer.canvas.js",
+  "description": "An HTML5 danmaku video player",
+  "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "webpack-dev-server --hot --inline",
+    "build": "webpack --progress --profile --colors"
   },
   "repository": {
     "type": "git",
@@ -17,11 +19,16 @@
   },
   "homepage": "https://github.com/gundam1993/BulletPlayer#readme",
   "devDependencies": {
-    "browser-sync": "^2.10.0",
-    "gulp": "^3.9.0",
-    "gulp-autoprefixer": "^3.1.0",
-    "gulp-minify-css": "^1.2.1",
-    "gulp-rename": "^1.2.2",
-    "gulp-sass": "^2.1.0"
+    "babel-core": "^6.18.2",
+    "babel-loader": "^6.2.7",
+    "babel-preset-es2015": "^6.18.0",
+    "css-loader": "^0.25.0",
+    "html-webpack-plugin": "^2.24.1",
+    "node-sass": "^3.13.0",
+    "open-browser-webpack-plugin": "0.0.3",
+    "sass-loader": "^4.0.2",
+    "style-loader": "^0.13.1",
+    "webpack": "^1.13.3",
+    "webpack-dev-server": "^1.16.2"
   }
 }

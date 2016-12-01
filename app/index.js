@@ -1,13 +1,16 @@
+import './main.css';
+
+
+import BulletPlayer from "./bulletPlayer.js";
+
 var videoUrl = "http://o8lfqzxlh.bkt.clouddn.com/1.mp4",
-    posterUrl = "";
+    posterUrl = "",
     opt = {
         volume : 0.7
     };
 
-var canvas = new BulletPlayer("#mainBlock");
-canvas.setVideo(videoUrl,posterUrl,opt);
-
-var video = document.querySelector("#BPlayer-video");
+var player = new BulletPlayer("#mainBlock");
+player.setVideo(videoUrl,posterUrl,opt);
 
 function allPrpos(obj) {  
     // 用来保存所有的属性名称和值  
@@ -38,7 +41,7 @@ ref.once("value", function(snapshot) {
                     if (danmukuList[time]) {
                         var danmukus = allPrpos(danmukuList[time]);
                         danmukus.forEach(function (item) {
-                            canvas.loadDanmuku(item);
+                            player.addDanmuku(item);
                         }); 
                     }
                 },100);
